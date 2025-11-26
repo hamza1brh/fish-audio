@@ -74,8 +74,20 @@ def main(input_path, output_path, config_name, checkpoint_path, device):
     if input_path.suffix in AUDIO_EXTENSIONS:
         logger.info(f"Processing in-place reconstruction of {input_path}")
 
-        # Load audio
-        audio, sr = torchaudio.load(str(input_path))
+        # Load audio with soundfile fallback for Windows compatibility
+        try:
+            audio, sr = torchaudio.load(str(input_path))
+        except ImportError:
+            # Fallback to soundfile for Windows (torchcodec not available)
+            audio_np, sr = sf.read(str(input_path))
+            audio = torch.from_numpy(audio_np).float()
+            
+            # Ensure correct shape [channels, samples]
+            if audio.dim() == 1:
+                audio = audio.unsqueeze(0)
+            else:
+                audio = audio.T
+        
         if audio.shape[0] > 1:
             audio = audio.mean(0, keepdim=True)
         audio = torchaudio.functional.resample(audio, sr, model.sample_rate)
@@ -113,10 +125,20 @@ def main(input_path, output_path, config_name, checkpoint_path, device):
         f"Generated audio of shape {fake_audios.shape}, equivalent to {audio_time:.2f} seconds from {indices.shape[1]} features, features/second: {indices.shape[1] / audio_time:.2f}"
     )
 
-    # Save audio
-    fake_audio = fake_audios[0, 0].float().cpu().numpy()
-    sf.write(output_path, fake_audio, model.sample_rate)
-    logger.info(f"Saved audio to {output_path}")
+    # Save audio - resample to 24kHz for correct playback
+    # The model outputs at 44.1kHz but should be played at 24kHz
+    fake_audio = fake_audios[0, 0].float().cpu()
+    target_sr = 24000
+    if model.sample_rate != target_sr:
+        logger.info(f"Resampling from {model.sample_rate}Hz to {target_sr}Hz")
+        fake_audio = torchaudio.functional.resample(
+            fake_audio.unsqueeze(0), 
+            model.sample_rate, 
+            target_sr
+        ).squeeze(0)
+    
+    sf.write(output_path, fake_audio.numpy(), target_sr)
+    logger.info(f"Saved audio to {output_path} at {target_sr}Hz")
 
 
 if __name__ == "__main__":

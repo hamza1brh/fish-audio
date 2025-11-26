@@ -9,6 +9,7 @@ from random import Random
 
 import click
 import numpy as np
+import soundfile as sf
 import torch
 import torchaudio
 from hydra import compose, initialize
@@ -23,11 +24,15 @@ OmegaConf.register_new_resolver("eval", eval)
 # This file is used to convert the audio files to text files using the Whisper model.
 # It's mainly used to generate the training data for the VQ model.
 
-backends = torchaudio.list_audio_backends()
-
-if "ffmpeg" in backends:
-    backend = "ffmpeg"
-else:
+# Fix for newer torchaudio versions that removed list_audio_backends()
+try:
+    backends = torchaudio.list_audio_backends()
+    if "ffmpeg" in backends:
+        backend = "ffmpeg"
+    else:
+        backend = "soundfile"
+except AttributeError:
+    # Newer torchaudio versions - use soundfile as default
     backend = "soundfile"
 
 RANK = int(os.environ.get("SLURM_PROCID", 0))
@@ -85,9 +90,14 @@ def process_batch(files: list[Path], model) -> float:
 
     for file in files:
         try:
-            wav, sr = torchaudio.load(
-                str(file), backend=backend
-            )  # Need to install libsox-dev
+            # Use soundfile directly instead of torchaudio.load with backend
+            wav_data, sr = sf.read(str(file))
+            # Convert to torch tensor and ensure shape is (channels, samples)
+            wav = torch.from_numpy(wav_data).float()
+            if wav.dim() == 1:
+                wav = wav.unsqueeze(0)  # Add channel dimension: (samples,) -> (1, samples)
+            else:
+                wav = wav.t()  # Transpose from (samples, channels) to (channels, samples)
         except Exception as e:
             logger.error(f"Error reading {file}: {e}")
             continue
