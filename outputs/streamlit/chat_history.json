@@ -1,0 +1,248 @@
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "(excited) Olá pessoal! Como vocês estão? É muito bom estar aqui!",
+      "timestamp": "2025-12-02T17:22:43.989449"
+    },
+    {
+      "role": "assistant",
+      "content": "❌ Failed to generate audio. Please try again.",
+      "timestamp": "2025-12-02T17:23:09.062577"
+    },
+    {
+      "role": "user",
+      "content": "Ah, então agora eu virei psicólogo também, né? \"Neymar, why did you miss that shot?\" \"Neymar, why are you always laughing?\" Mano, calma . Você vê cinco segundos no highlight e acha que sabe o jogo inteiro. Calmon, bro . Eu tô lá correndo, tomando pancada, pensando em três jogadas à frente. E você no sofá falando: \"Easy goal, bro!\" . Claro, super easy. Só tem dez caras tentando me matar em campo, mas tranquilo. Next time, I'll pause the match, open a PowerPoint, and explain every decision pra você, beleza?  Relaxa, mano. Eu jogo do meu jeito, me divirto, erro, acerto. And at the end of the day, quem tá cansado sou eu, não o seu controle de TV.",
+      "timestamp": "2025-12-02T17:31:39.818662"
+    },
+    {
+      "role": "assistant",
+      "content": "❌ Failed to generate audio. Please try again.",
+      "timestamp": "2025-12-02T17:31:48.483900"
+    },
+    {
+      "role": "user",
+      "content": "Ah, então agora eu virei psicólogo também, né? \"Neymar, why did you miss that shot?\" \"Neymar, why are you always laughing?\" Mano, calma . Você vê cinco segundos no highlight e acha que sabe o jogo inteiro. Calmon, bro . Eu tô lá correndo, tomando pancada, pensando em três jogadas à frente. E você no sofá falando: \"Easy goal, bro!\" . Claro, super easy. Só tem dez caras tentando me matar em campo, mas tranquilo. Next time, I'll pause the match, open a PowerPoint, and explain every decision pra você, beleza? Relaxa, mano. Eu jogo do meu jeito, me divirto, erro, acerto. And at the end of the day, quem tá cansado sou eu, não o seu controle de TV.",
+      "timestamp": "2025-12-02T17:32:35.544646"
+    },
+    {
+      "role": "assistant",
+      "content": "❌ Failed to generate audio. Please try again.",
+      "timestamp": "2025-12-02T17:32:44.574698"
+    },
+    {
+      "role": "user",
+      "content": "Ah, então agora eu virei psicólogo também, né? \"Neymar, why did you miss that shot?\" \"Neymar, why are you always laughing?\" Mano, calma . Você vê cinco segundos no highlight e acha que sabe o jogo inteiro. Calmon, bro . Eu tô lá correndo, tomando pancada, pensando em três jogadas à frente. E você no sofá falando: \"Easy goal, bro!\" . Claro, super easy. Só tem dez caras tentando me matar em campo, mas tranquilo. Next time, I'll pause the match, open a PowerPoint, and explain every decision pra você, beleza? Relaxa, mano. Eu jogo do meu jeito, me divirto, erro, acerto. And at the end of the day, quem tá cansado sou eu, não o seu controle de TV.",
+      "timestamp": "2025-12-02T17:34:37.059814"
+    },
+    {
+      "role": "assistant",
+      "content": "❌ Failed to generate audio. Please try again.",
+      "timestamp": "2025-12-02T17:34:45.313230"
+    },
+    {
+      "role": "user",
+      "content": "Ah, então agora eu virei psicólogo também, né? \"Neymar, why did you miss that shot?\" \"Neymar, why are you always laughing?\" Mano, calma . Você vê cinco segundos no highlight e acha que sabe o jogo inteiro. Calmon, bro . Eu tô lá correndo, tomando pancada, pensando em três jogadas à frente. E você no sofá falando: \"Easy goal, bro!\" . Claro, super easy. Só tem dez caras tentando me matar em campo, mas tranquilo. Next time, I'll pause the match, open a PowerPoint, and explain every decision pra você, beleza? Relaxa, mano. Eu jogo do meu jeito, me divirto, erro, acerto. And at the end of the day, quem tá cansado sou eu, não o seu controle de TV.",
+      "timestamp": "2025-12-03T19:01:58.828440"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 110.9s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251203_190158_0.wav",
+      "duration": 38.03429166666667,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-03T19:03:49.703702"
+    },
+    {
+      "role": "user",
+      "content": "(confident) Never give up on your dreams! Every challenge makes you stronger!",
+      "timestamp": "2025-12-03T20:10:00.139305"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 26.0s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251203_201000_1.wav",
+      "duration": 4.2725,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-03T20:10:26.179565"
+    },
+    {
+      "role": "user",
+      "content": "Eles me chamam de famoso, mas meus fãs não são mais meus. Algoritmos decidem quem me vê. Agentes decidem quem lucra comigo. As mídias e as plataformas possuem a minha voz, não você. A fome é passageira. O holofote de hoje é o silêncio de amanhã. Mas a minha história merece mais do que uma manchete. Meu espírito, meu amor, minha arte podem viver além do jogo.",
+      "timestamp": "2025-12-03T20:10:43.215968"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 61.0s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251203_201043_2.wav",
+      "duration": 25.681291666666667,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-03T20:11:44.210084"
+    },
+    {
+      "role": "user",
+      "content": "(soft tone) Eles me chamam de famoso, mas meus fãs não são mais meus. Algoritmos decidem quem me vê. Agentes decidem quem lucra comigo. As mídias e as plataformas possuem a minha voz, não você. A fome é passageira. O holofote de hoje é o silêncio de amanhã. Mas a minha história merece mais do que uma manchete. Meu espírito, meu amor, minha arte podem viver além do jogo.",
+      "timestamp": "2025-12-03T20:12:33.112028"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 60.7s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251203_201233_3.wav",
+      "duration": 25.95991666666667,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-03T20:13:33.842125"
+    },
+    {
+      "role": "user",
+      "content": "hola , tell me  who is your favourite player ? ",
+      "timestamp": "2025-12-05T20:25:05.956250"
+    },
+    {
+      "role": "assistant",
+      "content": "❌ Failed to generate audio. Please try again.",
+      "timestamp": "2025-12-05T20:25:07.371981"
+    },
+    {
+      "role": "user",
+      "content": "hola , tell me who is your favourite player ?",
+      "timestamp": "2025-12-05T20:25:47.773765"
+    },
+    {
+      "role": "assistant",
+      "content": "❌ Failed to generate audio. Please try again.",
+      "timestamp": "2025-12-05T20:25:48.882033"
+    },
+    {
+      "role": "user",
+      "content": "🧑\nhola , tell me who is your favourite player ?",
+      "timestamp": "2025-12-05T20:27:43.964341"
+    },
+    {
+      "role": "assistant",
+      "content": "❌ Failed to generate audio. Please try again.",
+      "timestamp": "2025-12-05T20:27:54.526141"
+    },
+    {
+      "role": "user",
+      "content": "hola , tell me who is your favourite player ?",
+      "timestamp": "2025-12-05T20:37:47.640658"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 37.1s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_203747_4.wav",
+      "duration": 2.4149166666666666,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T20:38:24.738481"
+    },
+    {
+      "role": "user",
+      "content": "Heyyy , tell me who is your favourite player ?",
+      "timestamp": "2025-12-05T20:38:54.949388"
+    },
+    {
+      "role": "user",
+      "content": "\nHeyyy , tell me who is your favourite player ?",
+      "timestamp": "2025-12-05T20:39:29.082368"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 19.1s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_203929_5.wav",
+      "duration": 2.1827083333333333,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T20:39:48.229128"
+    },
+    {
+      "role": "user",
+      "content": "\nHeyyy , tell me who is your favourite player ?",
+      "timestamp": "2025-12-05T20:40:28.898934"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 26.0s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_204028_6.wav",
+      "duration": 2.1827083333333333,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T20:40:54.890974"
+    },
+    {
+      "role": "user",
+      "content": "(excited) Heyyy , tell me who is your favourite player ?",
+      "timestamp": "2025-12-05T20:43:16.370663"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 27.5s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_204316_7.wav",
+      "duration": 2.507791666666667,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T20:43:43.835141"
+    },
+    {
+      "role": "user",
+      "content": "(annoyed) ohh my god , ( laughing) Ha ha ha ! \n(soft tone) what are you talking about bro ? ",
+      "timestamp": "2025-12-05T20:46:27.603696"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 21.9s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_204627_8.wav",
+      "duration": 4.226041666666666,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T20:46:49.550087"
+    },
+    {
+      "role": "user",
+      "content": "(annoyed) ohh my god , ( laughing) Ha ha ha ! (soft tone) what are you talking about bro ?",
+      "timestamp": "2025-12-05T20:48:00.891480"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 20.8s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_204800_9.wav",
+      "duration": 3.8080833333333333,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T20:48:21.738802"
+    },
+    {
+      "role": "user",
+      "content": "(annoyed) ohh my god , ( laughing) Ha, ha, ha! (soft tone) what are you talking about bro ?",
+      "timestamp": "2025-12-05T20:50:01.756654"
+    },
+    {
+      "role": "user",
+      "content": "Ah, então agora eu virei psicólogo também, né? \"Neymar, why did you miss that shot?\" \"Neymar, why are you always laughing?\" Mano, calma . Você vê cinco segundos no highlight e acha que sabe o jogo inteiro. Calmon, bro . Eu tô lá correndo, tomando pancada, pensando em três jogadas à frente. E você no sofá falando: \"Easy goal, bro!\" . Claro, super easy. Só tem dez caras tentando me matar em campo, mas tranquilo. Next time, I'll pause the match, open a PowerPoint, and explain every decision pra você, beleza? Relaxa, mano. Eu jogo do meu jeito, me divirto, erro, acerto. And at the end of the day, quem tá cansado sou eu, não o seu controle de TV.",
+      "timestamp": "2025-12-05T20:50:46.743211"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 89.0s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_205046_10.wav",
+      "duration": 44.164375,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T20:52:15.786570"
+    },
+    {
+      "role": "user",
+      "content": "(soft tone) Ah, então agora eu virei psicólogo também, né? \"Neymar, why did you miss that shot?\" \"Neymar, why are you always laughing?\" Mano, calma . Você vê cinco segundos no highlight e acha que sabe o jogo inteiro. Calmon, bro . Eu tô lá correndo, tomando pancada, pensando em três jogadas à frente. E você no sofá falando: \"Easy goal, bro!\" . Claro, super easy. Só tem dez caras tentando me matar em campo, mas tranquilo. Next time, I'll pause the match, open a PowerPoint, and explain every decision pra você, beleza? Relaxa, mano. Eu jogo do meu jeito, me divirto, erro, acerto. And at the end of the day, quem tá cansado sou eu, não o seu controle de TV.",
+      "timestamp": "2025-12-05T20:53:28.955085"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 78.4s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_205328_11.wav",
+      "duration": 37.709208333333336,
+      "generation_time": 78.44111275672913,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T20:54:47.402198"
+    },
+    {
+      "role": "user",
+      "content": "(soft tone) Ah, então agora eu virei psicólogo também, né? \"Neymar, why did you miss that shot?\" \"Neymar, why are you always laughing?\" Mano, calma . Você vê cinco segundos no highlight e acha que sabe o jogo inteiro. Calmon, bro . Eu tô lá correndo, tomando pancada, pensando em três jogadas à frente. E você no sofá falando: \"Easy goal, bro!\" . Claro, super easy. Só tem dez caras tentando me matar em campo, mas tranquilo. Next time, I'll pause the match, open a PowerPoint, and explain every decision pra você, beleza? Relaxa, mano. Eu jogo do meu jeito, me divirto, erro, acerto. And at the end of the day, quem tá cansado sou eu, não o seu controle de TV.",
+      "timestamp": "2025-12-05T20:56:22.206715"
+    }
+  ],
+  "generation_count": 12,
+  "last_updated": "2025-12-05T20:56:22.206715"
+}

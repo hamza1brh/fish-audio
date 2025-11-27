@@ -14,6 +14,7 @@ import sys
 import time
 import shutil
 import base64
+import json
 from pathlib import Path
 from datetime import datetime
 import numpy as np
@@ -86,6 +87,9 @@ PROJECT_ROOT = Path(__file__).parent
 OUTPUT_DIR = PROJECT_ROOT / "outputs" / "streamlit"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
+# History file for persistent chat history
+HISTORY_FILE = OUTPUT_DIR / "chat_history.json"
+
 # Available models configuration
 AVAILABLE_MODELS = {
     "openaudio-s1-mini": {
@@ -150,6 +154,34 @@ def get_device():
         pass
     return "cpu"
 
+def load_chat_history():
+    """Load chat history from JSON file."""
+    if HISTORY_FILE.exists():
+        try:
+            with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                # Validate audio paths still exist
+                for msg in data.get('messages', []):
+                    if 'audio_path' in msg and not Path(msg['audio_path']).exists():
+                        msg['audio_missing'] = True
+                return data
+        except Exception as e:
+            print(f"Error loading history: {e}")
+    return {'messages': [], 'generation_count': 0}
+
+def save_chat_history(messages, generation_count):
+    """Save chat history to JSON file."""
+    try:
+        data = {
+            'messages': messages,
+            'generation_count': generation_count,
+            'last_updated': datetime.now().isoformat()
+        }
+        with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"Error saving history: {e}")
+
 def get_available_models():
     """Check which models are actually downloaded."""
     available = {}
@@ -209,12 +241,16 @@ def generate_audio(
         ]
         result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(PROJECT_ROOT))
         if result.returncode != 0:
+            print(f"❌ VQ extraction failed: {result.stderr}")
+            print(f"Command: {' '.join(cmd)}")
             return False, "", 0
         
         # Rename fake.npy to our cached filename
         fake_npy = PROJECT_ROOT / "fake.npy"
         if fake_npy.exists():
             shutil.copy(str(fake_npy), str(vq_tokens_file))
+        else:
+            print(f"⚠️ Warning: fake.npy not found after VQ extraction")
     
     # Step 2: Generate semantic tokens
     cmd = [
@@ -233,6 +269,8 @@ def generate_audio(
     
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(PROJECT_ROOT))
     if result.returncode != 0:
+        print(f"❌ Semantic generation failed: {result.stderr}")
+        print(f"stdout: {result.stdout}")
         return False, "", 0
     
     # Step 3: Decode to audio
@@ -246,6 +284,8 @@ def generate_audio(
     
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(PROJECT_ROOT))
     if result.returncode != 0:
+        print(f"❌ DAC decoding failed: {result.stderr}")
+        print(f"stdout: {result.stdout}")
         return False, "", 0
     
     # Move output file
@@ -265,8 +305,15 @@ def generate_audio(
     return False, "", 0
 
 # ============================================================
-# SESSION STATE INITIALIZATION
+# SESSION STATE INITIALIZATION (with persistent history)
 # ============================================================
+
+if "history_loaded" not in st.session_state:
+    # Load history from file on first run
+    saved_history = load_chat_history()
+    st.session_state.messages = saved_history.get('messages', [])
+    st.session_state.generation_count = saved_history.get('generation_count', 0)
+    st.session_state.history_loaded = True
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -495,18 +542,31 @@ with st.sidebar:
     st.markdown("---")
     
     # ===== CLEAR CHAT =====
-    if st.button("🗑️ Clear Chat History", type="secondary"):
-        st.session_state.messages = []
-        st.session_state.generation_count = 0
-        st.rerun()
+    col_clear1, col_clear2 = st.columns(2)
+    with col_clear1:
+        if st.button("🗑️ Clear History", type="secondary"):
+            st.session_state.messages = []
+            st.session_state.generation_count = 0
+            save_chat_history([], 0)  # Clear saved history too
+            st.rerun()
+    with col_clear2:
+        if st.button("💾 Save History"):
+            save_chat_history(st.session_state.messages, st.session_state.generation_count)
+            st.success("✅ Saved!")
     
     # Stats
     st.subheader("📈 Session Stats")
     st.markdown(f"""
     - **Generations:** {st.session_state.generation_count}
+    - **History:** {len(st.session_state.messages)} messages
     - **Model:** {selected_model['name']}
     - **Device:** {get_device().upper()}
     """)
+    
+    # Show history file location
+    with st.expander("📂 History Location"):
+        st.code(str(HISTORY_FILE), language=None)
+        st.caption("History is auto-saved after each generation")
 
 # ============================================================
 # MAIN CHAT INTERFACE
@@ -549,8 +609,20 @@ for message in st.session_state.messages:
                             key=f"download_{message.get('timestamp', '')}_{message['audio_path']}"
                         )
                 with col2:
+                    # Display persistent metrics
+                    metrics_text = []
                     if "duration" in message:
-                        st.caption(f"Duration: {message['duration']:.2f}s | Model: {message.get('model', 'unknown')}")
+                        metrics_text.append(f"Duration: {message['duration']:.2f}s")
+                    if "generation_time" in message:
+                        metrics_text.append(f"Gen Time: {message['generation_time']:.1f}s")
+                        if "duration" in message:
+                            rtf = message['duration'] / message['generation_time']
+                            metrics_text.append(f"RTF: {rtf:.2f}x")
+                    if "model" in message:
+                        metrics_text.append(f"Model: {message['model']}")
+                    
+                    if metrics_text:
+                        st.caption(" | ".join(metrics_text))
 
 # Check for example text
 if "example_text" in st.session_state:
@@ -578,6 +650,7 @@ if prompt:
         "content": prompt,
         "timestamp": datetime.now().isoformat()
     })
+    save_chat_history(st.session_state.messages, st.session_state.generation_count)
     
     # Display user message
     with st.chat_message("user", avatar="🧑"):
@@ -637,9 +710,11 @@ if prompt:
                 "content": f"✅ Generated in {generation_time:.1f}s",
                 "audio_path": audio_path,
                 "duration": duration,
+                "generation_time": generation_time,
                 "model": selected_model['name'],
                 "timestamp": datetime.now().isoformat()
             })
+            save_chat_history(st.session_state.messages, st.session_state.generation_count)
         else:
             status_placeholder.markdown("❌ Failed to generate audio. Check console for errors.")
             st.session_state.messages.append({
@@ -647,6 +722,7 @@ if prompt:
                 "content": "❌ Failed to generate audio. Please try again.",
                 "timestamp": datetime.now().isoformat()
             })
+            save_chat_history(st.session_state.messages, st.session_state.generation_count)
 
 # Footer
 st.markdown("---")
