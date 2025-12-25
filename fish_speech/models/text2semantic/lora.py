@@ -10,23 +10,43 @@ class LoraConfig:
     lora_dropout: float = 0.0
 
 
-def setup_lora(model, lora_config):
-    # Replace the embedding layer with a LoRA layer
-    model.embeddings = lora.Embedding(
-        num_embeddings=model.embeddings.num_embeddings,
-        embedding_dim=model.embeddings.embedding_dim,
-        padding_idx=model.embeddings.padding_idx,
+def _replace_embedding_with_lora(model, attr_name, lora_config):
+    """Replace an embedding layer with a LoRA embedding while preserving weights."""
+    old_embedding = getattr(model, attr_name)
+    new_embedding = lora.Embedding(
+        num_embeddings=old_embedding.num_embeddings,
+        embedding_dim=old_embedding.embedding_dim,
+        padding_idx=old_embedding.padding_idx,
         r=lora_config.r,
         lora_alpha=lora_config.lora_alpha,
     )
+    # Copy the pretrained weights
+    new_embedding.weight.data = old_embedding.weight.data.clone()
+    setattr(model, attr_name, new_embedding)
 
-    model.codebook_embeddings = lora.Embedding(
-        num_embeddings=model.codebook_embeddings.num_embeddings,
-        embedding_dim=model.codebook_embeddings.embedding_dim,
-        padding_idx=model.codebook_embeddings.padding_idx,
+
+def _replace_linear_with_lora(module, attr_name, lora_config):
+    """Replace a linear layer with a LoRA linear while preserving weights."""
+    old_linear = getattr(module, attr_name)
+    new_linear = lora.Linear(
+        in_features=old_linear.in_features,
+        out_features=old_linear.out_features,
+        bias=old_linear.bias is not None,
         r=lora_config.r,
         lora_alpha=lora_config.lora_alpha,
+        lora_dropout=lora_config.lora_dropout,
     )
+    # Copy the pretrained weights
+    new_linear.weight.data = old_linear.weight.data.clone()
+    if old_linear.bias is not None:
+        new_linear.bias.data = old_linear.bias.data.clone()
+    setattr(module, attr_name, new_linear)
+
+
+def setup_lora(model, lora_config):
+    # Replace the embedding layers with LoRA layers while preserving weights
+    _replace_embedding_with_lora(model, "embeddings", lora_config)
+    _replace_embedding_with_lora(model, "codebook_embeddings", lora_config)
 
     # Replace output layer with a LoRA layer
     linears = [(model, "output")]
@@ -43,13 +63,7 @@ def setup_lora(model, lora_config):
         )
 
     if hasattr(model, "fast_layers"):
-        model.fast_embeddings = lora.Embedding(
-            num_embeddings=model.fast_embeddings.num_embeddings,
-            embedding_dim=model.fast_embeddings.embedding_dim,
-            padding_idx=model.fast_embeddings.padding_idx,
-            r=lora_config.r,
-            lora_alpha=lora_config.lora_alpha,
-        )
+        _replace_embedding_with_lora(model, "fast_embeddings", lora_config)
 
         # Dual-AR model
         linears.append((model, "fast_output"))
@@ -65,15 +79,7 @@ def setup_lora(model, lora_config):
             )
 
     for module, layer in linears:
-        updated_linear = lora.Linear(
-            in_features=getattr(module, layer).in_features,
-            out_features=getattr(module, layer).out_features,
-            bias=getattr(module, layer).bias,
-            r=lora_config.r,
-            lora_alpha=lora_config.lora_alpha,
-            lora_dropout=lora_config.lora_dropout,
-        )
-        setattr(module, layer, updated_linear)
+        _replace_linear_with_lora(module, layer, lora_config)
 
     # Mark only the LoRA layers as trainable
     lora.mark_only_lora_as_trainable(model, bias="none")

@@ -241,8 +241,213 @@
       "role": "user",
       "content": "(soft tone) Ah, então agora eu virei psicólogo também, né? \"Neymar, why did you miss that shot?\" \"Neymar, why are you always laughing?\" Mano, calma . Você vê cinco segundos no highlight e acha que sabe o jogo inteiro. Calmon, bro . Eu tô lá correndo, tomando pancada, pensando em três jogadas à frente. E você no sofá falando: \"Easy goal, bro!\" . Claro, super easy. Só tem dez caras tentando me matar em campo, mas tranquilo. Next time, I'll pause the match, open a PowerPoint, and explain every decision pra você, beleza? Relaxa, mano. Eu jogo do meu jeito, me divirto, erro, acerto. And at the end of the day, quem tá cansado sou eu, não o seu controle de TV.",
       "timestamp": "2025-12-05T20:56:22.206715"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 73.7s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_205622_12.wav",
+      "duration": 40.170541666666665,
+      "generation_time": 73.72113633155823,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T20:57:35.936851"
+    },
+    {
+      "role": "user",
+      "content": "(annoyed) ohh my god , ( laughing) Ha, ha, ha! (soft tone) what are you talking about bro ?",
+      "timestamp": "2025-12-05T20:58:16.560923"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 33.7s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_205816_13.wav",
+      "duration": 13.1425,
+      "generation_time": 33.70509600639343,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T20:58:50.272019"
+    },
+    {
+      "role": "user",
+      "content": "(annoyed) ohh my god , ( laughing ) Ha, ha, ha! (soft tone) what are you talking about bro ?",
+      "timestamp": "2025-12-05T21:00:04.708968"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 20.2s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_210004_14.wav",
+      "duration": 3.622333333333333,
+      "generation_time": 20.225581645965576,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T21:00:24.938547"
+    },
+    {
+      "role": "user",
+      "content": "(laughing) ahahahahaha",
+      "timestamp": "2025-12-05T21:00:51.075163"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 17.0s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_210051_15.wav",
+      "duration": 1.3003333333333333,
+      "generation_time": 16.991485118865967,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T21:01:08.072650"
+    },
+    {
+      "role": "user",
+      "content": "\n(laughing) ha  ha ha ha",
+      "timestamp": "2025-12-05T21:02:18.209845"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 17.4s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_210218_16.wav",
+      "duration": 1.4860833333333334,
+      "generation_time": 17.375763416290283,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T21:02:35.590615"
+    },
+    {
+      "role": "user",
+      "content": "\n(laughing) ha ha ha ha",
+      "timestamp": "2025-12-05T21:02:50.744361"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 18.0s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_210250_17.wav",
+      "duration": 2.0898333333333334,
+      "generation_time": 18.037935256958008,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T21:03:08.789318"
+    },
+    {
+      "role": "user",
+      "content": "\n(laughing) HAHAHAHAHAH",
+      "timestamp": "2025-12-05T21:03:26.555697"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 20.3s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_210326_18.wav",
+      "duration": 3.622333333333333,
+      "generation_time": 20.31183099746704,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T21:03:46.872032"
+    },
+    {
+      "role": "user",
+      "content": "\n(laughing) ahahahahaha",
+      "timestamp": "2025-12-05T21:04:26.986671"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 16.7s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_210426_19.wav",
+      "duration": 1.0217083333333334,
+      "generation_time": 16.654201984405518,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T21:04:43.645872"
+    },
+    {
+      "role": "user",
+      "content": "(laughing)haha(laughing)",
+      "timestamp": "2025-12-05T21:06:55.362163"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 16.4s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_210655_20.wav",
+      "duration": 1.0217083333333334,
+      "generation_time": 16.386014461517334,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T21:07:11.753178"
+    },
+    {
+      "role": "user",
+      "content": "(annoyed) ohh my god , ( laughing) Ha, ha, ha! (laughing),  (soft tone) what are you talking about bro ?",
+      "timestamp": "2025-12-05T21:07:52.835621"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 27.3s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_210752_21.wav",
+      "duration": 8.637833333333333,
+      "generation_time": 27.272716760635376,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T21:08:20.115336"
+    },
+    {
+      "role": "user",
+      "content": "(annoyed) ohh my god , ( laughing) Ha, ha, ha! (laughing), (soft tone) what are you talking about bro ?",
+      "timestamp": "2025-12-05T21:15:06.707071"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 25.3s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_211506_22.wav",
+      "duration": 7.1982083333333335,
+      "generation_time": 25.314548015594482,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T21:15:32.026615"
+    },
+    {
+      "role": "user",
+      "content": "(annoyed) ohh my god , ( laughing) Hahahaha (laughing), (soft tone) what are you talking about bro ?",
+      "timestamp": "2025-12-05T21:16:02.220862"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 21.8s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_211602_23.wav",
+      "duration": 4.3189166666666665,
+      "generation_time": 21.848527908325195,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T21:16:24.074390"
+    },
+    {
+      "role": "user",
+      "content": "(annoyed) ohh my god , ( laughing) Hahahaha (soft tone) what are you talking about bro ?",
+      "timestamp": "2025-12-05T21:17:54.138851"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 20.5s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_211754_24.wav",
+      "duration": 3.7616666666666667,
+      "generation_time": 20.50780153274536,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T21:18:14.651660"
+    },
+    {
+      "role": "user",
+      "content": "(annoyed) ohh my god , ( laughing) Hahahaha (laughing), (soft tone) what are you talking about bro ?",
+      "timestamp": "2025-12-05T21:18:33.128565"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 22.2s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_211833_25.wav",
+      "duration": 4.3189166666666665,
+      "generation_time": 22.236887216567993,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T21:18:55.370453"
+    },
+    {
+      "role": "user",
+      "content": "(annoyed) ohh my god , ( laughing) Hahahaha \n.(soft tone) what are you talking about bro ?",
+      "timestamp": "2025-12-05T21:46:04.019793"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 21.3s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20251205_214604_26.wav",
+      "duration": 4.08675,
+      "generation_time": 21.31786823272705,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2025-12-05T21:46:25.343667"
     }
   ],
-  "generation_count": 12,
-  "last_updated": "2025-12-05T20:56:22.206715"
+  "generation_count": 27,
+  "last_updated": "2025-12-05T21:46:25.343667"
 }

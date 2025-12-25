@@ -1,0 +1,20 @@
+# Core dependencies (CUDA-agnostic)
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.1
+pydantic>=2.10.0
+pydantic-settings>=2.6.0
+soundfile>=0.12.1
+numpy>=1.26.0,<2.0
+httpx>=0.28.0
+huggingface-hub>=0.27.0
+loguru>=0.7.0
+aiofiles>=24.1.0
+
+# PyTorch - install separately for your CUDA version:
+#   python install.py                    # Auto-detect
+#   pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu121  # CUDA 12.1
+#   pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu124  # CUDA 12.4
+#   pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu118  # CUDA 11.8
+
+# fish-speech - install after PyTorch:
+#   pip install fish-speech

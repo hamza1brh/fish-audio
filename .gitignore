@@ -111,3 +111,4 @@ ffprobe.exe
 # ----------
 /*.test.sh
 asr-label*
+.cursor/rules/aetern.mdc

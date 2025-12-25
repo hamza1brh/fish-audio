@@ -1,0 +1,3 @@
+   cd voice-service
+   mkdir -p checkpoints
+   huggingface-cli download fishaudio/openaudio-s1-mini --local-dir checkpoints/openaudio-s1-mini
