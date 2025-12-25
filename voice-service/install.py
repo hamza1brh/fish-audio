@@ -3,6 +3,7 @@
 import subprocess
 import sys
 import shutil
+import platform
 from pathlib import Path
 
 
@@ -76,10 +77,74 @@ def get_torch_index_url(cuda_version: str | None) -> str:
         return "https://download.pytorch.org/whl/cu121"
 
 
+def install_system_dependencies():
+    """Install system dependencies required for pyaudio (PortAudio)."""
+    system = platform.system().lower()
+    
+    if system == "linux":
+        print("\n[0/4] Installing system dependencies (PortAudio)...")
+        print("  This is required for pyaudio to compile")
+        try:
+            # Try apt (Debian/Ubuntu)
+            update_result = subprocess.run(
+                ["sudo", "apt-get", "update"],
+                check=False,
+                capture_output=True,
+                text=True
+            )
+            if update_result.returncode != 0:
+                print(f"  Warning: apt-get update failed: {update_result.stderr}")
+                print("  You may need to run manually: sudo apt-get update")
+            
+            install_result = subprocess.run(
+                ["sudo", "apt-get", "install", "-y", "portaudio19-dev", "libasound2-dev"],
+                check=False,
+                capture_output=True,
+                text=True
+            )
+            if install_result.returncode == 0:
+                print("  ✓ System dependencies installed successfully")
+            else:
+                print(f"  ✗ Failed to install system dependencies: {install_result.stderr}")
+                print("  Manual fix: sudo apt-get install -y portaudio19-dev libasound2-dev")
+                print("  Then re-run: python install.py")
+        except FileNotFoundError:
+            print("  Warning: sudo not found. You may need to install PortAudio manually.")
+            print("  Run: sudo apt-get install -y portaudio19-dev libasound2-dev")
+        except Exception as e:
+            print(f"  Warning: Could not install system dependencies: {e}")
+            print("  Manual fix: sudo apt-get install -y portaudio19-dev libasound2-dev")
+    elif system == "darwin":  # macOS
+        print("\n[0/4] Installing system dependencies (PortAudio)...")
+        try:
+            result = subprocess.run(
+                ["brew", "install", "portaudio"],
+                check=False,
+                capture_output=True,
+                text=True
+            )
+            if result.returncode == 0:
+                print("  ✓ System dependencies installed successfully")
+            else:
+                print(f"  ✗ Failed: {result.stderr}")
+                print("  Manual fix: brew install portaudio")
+        except FileNotFoundError:
+            print("  Warning: brew not found. Install Homebrew first or install PortAudio manually.")
+        except Exception as e:
+            print(f"  Warning: Could not install system dependencies: {e}")
+            print("  Manual fix: brew install portaudio")
+    else:
+        print("\n[0/4] Skipping system dependencies (Windows or unknown OS)")
+        print("  Note: pyaudio may require manual installation on Windows")
+
+
 def main():
     print("=" * 60)
     print("Voice Service Installer")
     print("=" * 60)
+
+    # Install system dependencies first
+    install_system_dependencies()
 
     # Detect CUDA
     cuda_version = get_cuda_version()
@@ -93,21 +158,35 @@ def main():
     print("-" * 60)
 
     # Install base requirements
-    print("\n[1/3] Installing base dependencies...")
+    print("\n[1/4] Installing base dependencies...")
     subprocess.run([
         sys.executable, "-m", "pip", "install", "-r", "requirements.txt"
     ], check=True)
 
     # Install PyTorch
-    print("\n[2/3] Installing PyTorch...")
+    print("\n[2/4] Installing PyTorch...")
     subprocess.run([
         sys.executable, "-m", "pip", "install",
         "torch", "torchaudio",
         "--index-url", torch_url
     ], check=True)
 
-    # Install fish-speech
-    print("\n[3/3] Installing fish-speech...")
+    # Try to install pyaudio first (optional, for CLI tools only)
+    print("\n[3/4] Installing fish-speech...")
+    print("  Attempting to install pyaudio (optional, for CLI tools)...")
+    pyaudio_result = subprocess.run([
+        sys.executable, "-m", "pip", "install", "pyaudio"
+    ], capture_output=True, text=True)
+    
+    if pyaudio_result.returncode != 0:
+        print("  Warning: pyaudio installation failed (this is OK - not needed for API service)")
+        print("  Note: pyaudio is only used for audio playback in CLI tools")
+        print("  The voice-service API will work fine without it")
+    else:
+        print("  pyaudio installed successfully")
+    
+    # Install fish-speech (will skip pyaudio if already failed, or install it if successful)
+    print("  Installing fish-speech...")
     subprocess.run([
         sys.executable, "-m", "pip", "install", "fish-speech"
     ], check=True)

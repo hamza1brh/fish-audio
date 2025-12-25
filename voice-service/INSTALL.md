@@ -63,9 +63,15 @@ cd /home/sagemaker-user
 git clone <your-repo> voice-service
 cd voice-service
 
+# Install system dependencies first (required for pyaudio)
+sudo apt-get update
+sudo apt-get install -y portaudio19-dev libasound2-dev
+
 # SageMaker has CUDA pre-installed
 python install.py
 ```
+
+**Note:** If `pyaudio` installation fails, the service will still work. `pyaudio` is only needed for CLI audio playback tools, not for the API service. The installer will attempt to install fish-speech without pyaudio if needed.
 
 ### AWS EC2 (g4dn, g5, p4d, p5)
 
