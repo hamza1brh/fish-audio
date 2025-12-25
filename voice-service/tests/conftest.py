@@ -71,6 +71,18 @@ def engine(checkpoint_path, gpu_available):
     os.environ["VOICE_S1_CHECKPOINT_PATH"] = str(checkpoint_path)
     os.environ["VOICE_TTS_PROVIDER"] = "s1_mini"
 
+    # Fix pyrootutils issue: fish-speech installed as package needs project root
+    # Create .project-root marker in parent directory if it doesn't exist
+    parent_dir = Path.cwd().parent
+    project_root_marker = parent_dir / ".project-root"
+    if not project_root_marker.exists():
+        project_root_marker.touch()
+    
+    # Set PYTHONPATH to include parent directory
+    current_pythonpath = os.environ.get("PYTHONPATH", "")
+    if str(parent_dir) not in current_pythonpath:
+        os.environ["PYTHONPATH"] = f"{parent_dir}:{current_pythonpath}" if current_pythonpath else str(parent_dir)
+
     # Find fish_speech path
     fish_speech_paths = [
         Path.cwd().parent,
