@@ -57,6 +57,16 @@ cache/
 *.pt
 *.ckpt
 *.safetensors
+*.bin
+*.h5
+*.hdf5
+*.onnx
+pretrained_models/
+models/
+weights/
+datasets/
+*_Dataset*/
+*_dataset*/
 
 # Audio files
 *.wav

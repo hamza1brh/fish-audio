@@ -18,3 +18,4 @@ fi
 # Execute the main command
 exec "$@"
 
+

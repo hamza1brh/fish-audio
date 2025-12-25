@@ -35,3 +35,4 @@ def test_batch_size_scaling(engine):
         for r in results:
             assert len(r) > 0
 
+

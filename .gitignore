@@ -63,6 +63,8 @@ venv.bak/
 # Data and Model Files
 # --------------------
 data/
+datasets/
+dataset/
 results/
 checkpoints/
 references/
@@ -70,6 +72,29 @@ demo-audios/
 example/
 filelists/
 *.filelist
+*_Dataset*/
+*_dataset*/
+*Dataset*/
+*dataset*/
+
+# Model Checkpoints and Weights
+# ------------------------------
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+*.bin
+*.h5
+*.hdf5
+*.pb
+*.onnx
+*.tflite
+*.pkl
+*.pickle
+pretrained_models/
+models/
+weights/
+cosyvoice_demo/
 
 # Audio Files
 # -----------
@@ -78,15 +103,22 @@ filelists/
 *.flac
 *.ogg
 *.m4a
+*.aac
+*.wma
+*.opus
+*.m4a
 
 # Data Files
 # ----------
 *.npy
 *.npz
-*.pkl
-*.pickle
 *.lab
+*.parquet
+*.arrow
 /fish_speech/text/cmudict_cache.pickle
+
+# Note: *.txt, *.csv, *.json are NOT ignored as they may be config/code files
+# Add specific dataset files manually if needed
 
 # Cache and Temporary Files
 # --------------------------
