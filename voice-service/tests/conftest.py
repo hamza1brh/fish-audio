@@ -82,9 +82,9 @@ def engine(checkpoint_path, gpu_available):
             os.environ["VOICE_FISH_SPEECH_PATH"] = str(p)
             break
 
-    from src.inference.engine import S1MiniEngine
+    from src.inference.engine import S1MiniBackend
 
-    eng = S1MiniEngine(
+    eng = S1MiniBackend(
         checkpoint_path=checkpoint_path,
         codec_path=checkpoint_path / "codec.pth",
         device="cuda",

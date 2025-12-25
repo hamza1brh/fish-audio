@@ -44,12 +44,24 @@ pip install \
     "silero-vad" \
     "ormsgpack" \
     "tiktoken>=0.8.0" \
-    "pydantic==2.9.2" \
+    "pydantic>=2.10.0,<3.0.0" \
     "cachetools" \
     "descript-audio-codec" \
     "descript-audiotools"
 
+# Fix pydantic version conflict (SageMaker requires >=2.10.0)
+echo "Fixing pydantic version for SageMaker compatibility..."
+pip install "pydantic>=2.10.0,<3.0.0" --upgrade
+
+# Install test dependencies
+echo ""
+echo "Installing test dependencies..."
+pip install pytest>=8.0.0 pytest-asyncio>=0.25.0
+
 echo ""
 echo "✓ Installation complete!"
 echo "The API service will work fine without pyaudio."
+echo ""
+echo "To run tests:"
+echo "  pytest tests/"
 

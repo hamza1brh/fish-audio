@@ -239,7 +239,7 @@ def main():
             "silero-vad",
             "ormsgpack",
             "tiktoken>=0.8.0",
-            "pydantic==2.9.2",
+            "pydantic>=2.10.0,<3.0.0",  # SageMaker requires >=2.10.0
             "cachetools",
             "descript-audio-codec",
             "descript-audiotools"

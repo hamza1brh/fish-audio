@@ -46,10 +46,10 @@ ignore = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+asyncio_mode = "auto"
 markers = [
     "gpu: tests requiring GPU hardware",
     "asyncio: async tests",
 ]
-asyncio_mode = "auto"
 
 
