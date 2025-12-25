@@ -6,6 +6,29 @@ from pathlib import Path
 import pytest
 
 
+def _fix_pyrootutils_for_fish_speech():
+    """Create .project-root marker in fish-speech site-packages if installed as package.
+    
+    fish-speech uses pyrootutils.setup_root() which searches for .project-root
+    starting from the package's installation directory. When installed via pip,
+    this file doesn't exist, causing FileNotFoundError.
+    """
+    try:
+        import fish_speech
+        if fish_speech.__file__ is None:
+            return
+        pkg_path = Path(fish_speech.__file__).parent.parent
+        project_root = pkg_path / ".project-root"
+        if not project_root.exists():
+            project_root.touch()
+    except (ImportError, PermissionError):
+        pass
+
+
+# Fix pyrootutils before any fish-speech imports happen
+_fix_pyrootutils_for_fish_speech()
+
+
 def pytest_addoption(parser):
     parser.addoption("--gpu", action="store_true", help="Run GPU tests")
 
@@ -64,35 +87,12 @@ def checkpoint_path():
 
 @pytest.fixture(scope="session")
 def engine(checkpoint_path, gpu_available):
-    """Initialize S1MiniEngine for GPU tests."""
+    """Initialize S1MiniBackend for GPU tests."""
     if not gpu_available:
         pytest.skip("GPU not available")
 
     os.environ["VOICE_S1_CHECKPOINT_PATH"] = str(checkpoint_path)
     os.environ["VOICE_TTS_PROVIDER"] = "s1_mini"
-
-    # Fix pyrootutils issue: fish-speech installed as package needs project root
-    # Create .project-root marker in parent directory if it doesn't exist
-    parent_dir = Path.cwd().parent
-    project_root_marker = parent_dir / ".project-root"
-    if not project_root_marker.exists():
-        project_root_marker.touch()
-    
-    # Set PYTHONPATH to include parent directory
-    current_pythonpath = os.environ.get("PYTHONPATH", "")
-    if str(parent_dir) not in current_pythonpath:
-        os.environ["PYTHONPATH"] = f"{parent_dir}:{current_pythonpath}" if current_pythonpath else str(parent_dir)
-
-    # Find fish_speech path
-    fish_speech_paths = [
-        Path.cwd().parent,
-        Path.cwd(),
-        Path(os.environ.get("VOICE_FISH_SPEECH_PATH", "")),
-    ]
-    for p in fish_speech_paths:
-        if (p / "fish_speech").exists():
-            os.environ["VOICE_FISH_SPEECH_PATH"] = str(p)
-            break
 
     from src.inference.engine import S1MiniBackend
 
