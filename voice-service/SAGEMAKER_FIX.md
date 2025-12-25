@@ -1,5 +1,10 @@
 # SageMaker Installation Fix
 
+## Your Environment
+- **GPU**: Tesla T4 (16GB VRAM)
+- **CUDA**: 13.0
+- **Driver**: 580.105.08
+
 ## Problem
 `pyaudio` fails to build because PortAudio system libraries are missing.
 
@@ -12,9 +17,11 @@ Run these commands **before** `python install.py`:
 sudo apt-get update
 sudo apt-get install -y portaudio19-dev libasound2-dev
 
-# Then run the installer
+# Then run the installer (will auto-detect CUDA 13.0 and use cu124 wheels)
 python install.py
 ```
+
+**Note**: CUDA 13.0 is detected automatically. PyTorch will use cu124 wheels (backward compatible with CUDA 13.0).
 
 ## Alternative: Use the SageMaker Install Script
 

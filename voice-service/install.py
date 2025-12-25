@@ -29,15 +29,29 @@ def get_cuda_version() -> str | None:
     nvidia_smi = shutil.which("nvidia-smi")
     if nvidia_smi:
         try:
+            # First try to get CUDA version directly from nvidia-smi
+            result = subprocess.run(
+                [nvidia_smi, "--query-gpu=cuda_version", "--format=csv,noheader"],
+                capture_output=True, text=True
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                cuda_ver = result.stdout.strip().split("\n")[0].strip()
+                # Parse "13.0" or "12.4" format
+                if cuda_ver:
+                    return cuda_ver
+            
+            # Fallback: infer from driver version
             result = subprocess.run(
                 [nvidia_smi, "--query-gpu=driver_version", "--format=csv,noheader"],
                 capture_output=True, text=True
             )
             # nvidia-smi shows driver version, infer CUDA capability
-            # Driver 535+ = CUDA 12.x, 525+ = CUDA 12.0, 515+ = CUDA 11.8
+            # Driver 580+ = CUDA 13.x, 560+ = CUDA 12.8, 545+ = CUDA 12.4, 535+ = CUDA 12.1
             driver = result.stdout.strip().split("\n")[0]
             major = int(driver.split(".")[0])
-            if major >= 560:
+            if major >= 580:
+                return "13.0"
+            elif major >= 560:
                 return "12.8"
             elif major >= 545:
                 return "12.4"
@@ -64,7 +78,11 @@ def get_torch_index_url(cuda_version: str | None) -> str:
     cuda_minor = int(minor)
 
     # Map CUDA version to PyTorch wheel
-    if cuda_major >= 12 and cuda_minor >= 8:
+    # CUDA 13.0+ uses cu124 wheels (backward compatible)
+    if cuda_major >= 13:
+        print(f"CUDA {cuda_version} detected - using cu124 wheels (backward compatible)")
+        return "https://download.pytorch.org/whl/cu124"
+    elif cuda_major >= 12 and cuda_minor >= 8:
         return "https://download.pytorch.org/whl/nightly/cu128"
     elif cuda_major >= 12 and cuda_minor >= 4:
         return "https://download.pytorch.org/whl/cu124"
@@ -73,8 +91,8 @@ def get_torch_index_url(cuda_version: str | None) -> str:
     elif cuda_major >= 11 and cuda_minor >= 8:
         return "https://download.pytorch.org/whl/cu118"
     else:
-        print(f"CUDA {cuda_version} may not be fully supported, trying cu121")
-        return "https://download.pytorch.org/whl/cu121"
+        print(f"CUDA {cuda_version} may not be fully supported, trying cu124")
+        return "https://download.pytorch.org/whl/cu124"
 
 
 def install_system_dependencies():
