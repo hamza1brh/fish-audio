@@ -23,25 +23,44 @@ python install.py
 
 **Note**: CUDA 13.0 is detected automatically. PyTorch will use cu124 wheels (backward compatible with CUDA 13.0).
 
-## Alternative: Use the SageMaker Install Script
+## Alternative: Use the SageMaker Fix Script (Recommended)
+
+This script handles pyaudio failures gracefully:
 
 ```bash
-chmod +x install-sagemaker.sh
-./install-sagemaker.sh
+chmod +x install-sagemaker-fix.sh
+./install-sagemaker-fix.sh
 ```
 
+This will:
+1. Install PortAudio system libraries
+2. Try to install pyaudio (continues if it fails)
+3. Install fish-speech (with or without pyaudio)
+4. Verify the installation
+
+**This is the recommended approach for SageMaker environments.**
+
 ## If You Already Ran install.py and It Failed
+
+**Quick Fix (Recommended):**
+
+```bash
+chmod +x quick-fix-sagemaker.sh
+./quick-fix-sagemaker.sh
+```
+
+**Or Manual Fix:**
 
 ```bash
 # Install system dependencies
 sudo apt-get update
 sudo apt-get install -y portaudio19-dev libasound2-dev
 
-# Install pyaudio manually
-pip install pyaudio
+# Install fish-speech without pyaudio
+pip install fish-speech --no-deps
 
-# Then continue with fish-speech
-pip install fish-speech
+# Install dependencies manually (see quick-fix-sagemaker.sh for full list)
+pip install numpy<=1.26.4 transformers>=4.45.2 datasets==2.18.0 lightning>=2.1.0 ...
 ```
 
 ## Why This Happens

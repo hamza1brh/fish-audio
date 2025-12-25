@@ -189,25 +189,73 @@ def main():
         "--index-url", torch_url
     ], check=True)
 
-    # Try to install pyaudio first (optional, for CLI tools only)
+    # Install fish-speech
     print("\n[3/4] Installing fish-speech...")
-    print("  Attempting to install pyaudio (optional, for CLI tools)...")
+    print("  Attempting to install pyaudio first (optional, for CLI tools)...")
     pyaudio_result = subprocess.run([
         sys.executable, "-m", "pip", "install", "pyaudio"
     ], capture_output=True, text=True)
     
-    if pyaudio_result.returncode != 0:
-        print("  Warning: pyaudio installation failed (this is OK - not needed for API service)")
-        print("  Note: pyaudio is only used for audio playback in CLI tools")
-        print("  The voice-service API will work fine without it")
-    else:
-        print("  pyaudio installed successfully")
+    pyaudio_installed = pyaudio_result.returncode == 0
     
-    # Install fish-speech (will skip pyaudio if already failed, or install it if successful)
-    print("  Installing fish-speech...")
-    subprocess.run([
-        sys.executable, "-m", "pip", "install", "fish-speech"
-    ], check=True)
+    if not pyaudio_installed:
+        print("  ⚠ pyaudio installation failed (this is OK - not needed for API service)")
+        print("  Note: pyaudio is only used for audio playback in CLI tools")
+        print("  Installing fish-speech without pyaudio dependency...")
+        
+        # Install fish-speech without dependencies first
+        print("  Installing fish-speech package...")
+        subprocess.run([
+            sys.executable, "-m", "pip", "install", "fish-speech", "--no-deps"
+        ], check=True)
+        
+        # Install fish-speech dependencies manually (excluding pyaudio)
+        print("  Installing fish-speech dependencies (excluding pyaudio)...")
+        fish_deps = [
+            "numpy<=1.26.4",
+            "transformers>=4.45.2",
+            "datasets==2.18.0",
+            "lightning>=2.1.0",
+            "hydra-core>=1.3.2",
+            "tensorboard>=2.14.1",
+            "natsort>=8.4.0",
+            "einops>=0.7.0",
+            "librosa>=0.10.1",
+            "rich>=13.5.3",
+            "gradio>5.0.0",
+            "wandb>=0.15.11",
+            "grpcio>=1.58.0",
+            "kui>=1.6.0",
+            "uvicorn>=0.30.0",
+            "loguru>=0.6.0",
+            "loralib>=0.1.2",
+            "pyrootutils>=1.0.4",
+            "resampy>=0.4.3",
+            "einx[torch]==0.2.2",
+            "zstandard>=0.22.0",
+            "pydub",
+            "modelscope==1.17.1",
+            "opencc-python-reimplemented==0.1.7",
+            "silero-vad",
+            "ormsgpack",
+            "tiktoken>=0.8.0",
+            "pydantic==2.9.2",
+            "cachetools",
+            "descript-audio-codec",
+            "descript-audiotools"
+        ]
+        subprocess.run([
+            sys.executable, "-m", "pip", "install"
+        ] + fish_deps, check=True)
+        print("  ✓ fish-speech installed successfully (without pyaudio)")
+        print("  ✓ API service will work fine without pyaudio")
+    else:
+        print("  ✓ pyaudio installed successfully")
+        print("  Installing fish-speech with all dependencies...")
+        subprocess.run([
+            sys.executable, "-m", "pip", "install", "fish-speech"
+        ], check=True)
+        print("  ✓ fish-speech installed successfully")
 
     # Download model if not present
     checkpoint_dir = Path("checkpoints/openaudio-s1-mini")
