@@ -112,11 +112,12 @@ class TTSGenerator:
         print("[1/3] Extracting VQ tokens...", end=" ", flush=True)
         step1_start = time.time()
         
+        # Use fish-speech inference API directly
         vq_cmd = [
-            "python", "-m", "tools.vqgan.extract_vq",
-            str(self.checkpoint_dir / "codec.pth"),
-            reference_audio,
-            "--output-path", str(vq_tokens_path)
+            "python", "-m", "fish_speech.models.dac.inference",
+            str(reference_audio),
+            "--checkpoint-path", str(self.checkpoint_dir / "codec.pth"),
+            "--output-path", str(vq_tokens_path.with_suffix(''))
         ]
         
         result = subprocess.run(vq_cmd, capture_output=True, text=True)
