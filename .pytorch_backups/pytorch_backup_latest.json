@@ -1,0 +1,14 @@
+{
+  "timestamp": "20260102_203121",
+  "datetime": "2026-01-02T20:31:21.276519",
+  "torch_info": {
+    "torch_version": "2.11.0.dev20260101+cu128",
+    "torchvision_version": "0.25.0.dev20260101+cu128",
+    "torchaudio_version": "2.10.0.dev20260101+cu128",
+    "cuda_available": true,
+    "cuda_version": "12.8",
+    "gpu_name": "NVIDIA GeForce RTX 5070 Ti",
+    "compute_cap": "sm_120"
+  },
+  "restore_command": "pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu128"
+}
