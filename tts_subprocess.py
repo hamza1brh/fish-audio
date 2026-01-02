@@ -72,7 +72,8 @@ def generate_tts(
             vq_cmd = [
                 sys.executable,
                 "-m", "fish_speech.models.dac.inference",
-                str(reference_audio),
+                "--input-path", str(reference_audio),
+                "--output-path", str(vq_tokens_file),
                 "--checkpoint-path", str(PROJECT_ROOT / "checkpoints/openaudio-s1-mini/codec.pth")
             ]
             
@@ -81,11 +82,6 @@ def generate_tts(
             if result.returncode != 0:
                 print(f"FAILED\nError: {result.stderr}")
                 return False
-            
-            # Move generated codes to cache
-            codes_path = PROJECT_ROOT / f"{Path(reference_audio).stem}_codes.npy"
-            if codes_path.exists():
-                codes_path.rename(vq_tokens_file)
         
         step1_time = time.time() - step1_start
         print(f"Done in {step1_time:.2f}s")
@@ -133,9 +129,9 @@ def generate_tts(
         decode_cmd = [
             sys.executable,
             "-m", "fish_speech.models.dac.inference",
-            str(codes_file),
-            "--checkpoint-path", str(PROJECT_ROOT / "checkpoints/openaudio-s1-mini/codec.pth"),
-            "--output-path", str(output_path.with_suffix(''))
+            "--input-path", str(codes_file),
+            "--output-path", str(output_path),
+            "--checkpoint-path", str(PROJECT_ROOT / "checkpoints/openaudio-s1-mini/codec.pth")
         ]
         
         result = subprocess.run(decode_cmd, capture_output=True, text=True, cwd=str(PROJECT_ROOT))
@@ -153,18 +149,8 @@ def generate_tts(
         
         total_time = time.time() - total_start
         
-        # Check if output was created (might have .wav or no extension)
-        actual_output = None
-        for ext in ['', '.wav']:
-            check_path = Path(str(output_path.with_suffix('')) + ext)
-            if check_path.exists():
-                actual_output = check_path
-                if check_path != output_path:
-                    check_path.rename(output_path)
-                    actual_output = output_path
-                break
-        
-        if not actual_output or not actual_output.exists():
+        # Check if output was created
+        if not output_path.exists():
             print(f"FAILED\nError: Output file not created")
             return False
         
