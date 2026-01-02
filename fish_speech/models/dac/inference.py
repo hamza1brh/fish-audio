@@ -77,7 +77,7 @@ def main(input_path, output_path, config_name, checkpoint_path, device):
         # Load audio with soundfile fallback for Windows compatibility
         try:
             audio, sr = torchaudio.load(str(input_path))
-        except ImportError:
+        except (ImportError, RuntimeError):
             # Fallback to soundfile for Windows (torchcodec not available)
             audio_np, sr = sf.read(str(input_path))
             audio = torch.from_numpy(audio_np).float()

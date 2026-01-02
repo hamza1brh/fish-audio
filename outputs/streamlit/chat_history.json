@@ -446,8 +446,443 @@
       "generation_time": 21.31786823272705,
       "model": "OpenAudio S1-mini",
       "timestamp": "2025-12-05T21:46:25.343667"
+    },
+    {
+      "role": "user",
+      "content": "No coração da Amazônia, onde o Rio Negro e o Solimões se encontram sem se misturar, vivia uma jovem chamada Maya. Em sua aldeia, contava-se a lenda do Uirapuru, o \"pássaro mágico\" cujo canto é tão belo que todas as outras aves silenciam apenas para ouvir. Diz a tradição que quem ouve o seu canto recebe um desejo do coração.",
+      "timestamp": "2026-01-02T01:48:26.879008"
+    },
+    {
+      "role": "assistant",
+      "content": "❌ Voice generation failed",
+      "llm_text": "(amused) Ah, que história encantadora! (excited) O Uirapuru, o \"pássaro mágico\"! (proud) Você sabe, eu sempre fui fascinado pelas lendas e mitos da nossa cultura brasileira. (soft tone) E essa história da Maya e do Uirapuru me lembra da minha própria conexão com a natureza e a magia do futebol. (confident) Quando estou em campo, sinto que posso fazer acontecer coisas incríveis, como se o meu próprio canto fosse capaz de silenciar os outros e fazer com que meus sonhos se tornem realidade. (joyful) E quem não gostaria de ter um desejo do coração concedido, não é? (curious) Você acha que o Uirapuru existe de verdade? (laughing) Talvez eu deva ir à Amazônia um dia para descobrir!",
+      "timestamp": "2026-01-02T01:48:38.374739"
+    },
+    {
+      "role": "user",
+      "content": "No coração da Amazônia, onde o Rio Negro e o Solimões se encontram sem se misturar, vivia uma jovem chamada Maya. Em sua aldeia, contava-se a lenda do Uirapuru, o \"pássaro mágico\" cujo canto é tão belo que todas as outras aves silenciam apenas para ouvir. Diz a tradição que quem ouve o seu canto recebe um desejo do coração.",
+      "timestamp": "2026-01-02T02:38:25.286417"
+    },
+    {
+      "role": "user",
+      "content": "No coração da Amazônia, onde o Rio Negro e o Solimões se encontram sem se misturar, vivia uma jovem chamada Maya. Em sua aldeia, contava-se a lenda do Uirapuru, o \"pássaro mágico\" cujo canto é tão belo que todas as outras aves silenciam apenas para ouvir. Diz a tradição que quem ouve o seu canto recebe um desejo do coração.",
+      "timestamp": "2026-01-02T02:40:56.897591"
+    },
+    {
+      "role": "user",
+      "content": "No coração da Amazônia, onde o Rio Negro e o Solimões se encontram sem se misturar, vivia uma jovem chamada Maya. Em sua aldeia, contava-se a lenda do Uirapuru, o \"pássaro mágico\" cujo canto é tão belo que todas as outras aves silenciam apenas para ouvir. Diz a tradição que quem ouve o seu canto recebe um desejo do coração.",
+      "timestamp": "2026-01-02T02:46:17.240763"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 58.4s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_024617_27.wav",
+      "duration": 19.969166666666666,
+      "generation_time": 58.40823841094971,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T02:47:15.655008"
+    },
+    {
+      "role": "user",
+      "content": "what is your favourite car",
+      "timestamp": "2026-01-02T02:49:53.299966"
+    },
+    {
+      "role": "assistant",
+      "content": "My favourite car is the Mercedes-Benz AMG GT 63 S, it's a beast on the road, you know! I've had the chance to drive some amazing cars, but this one is something special.",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_024953_28.wav",
+      "duration": 11.052708333333333,
+      "generation_time": 34.915931701660156,
+      "llm_time": 0.443509578704834,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T02:50:28.665414"
+    },
+    {
+      "role": "user",
+      "content": "how many do you have ? ",
+      "timestamp": "2026-01-02T02:51:28.994442"
+    },
+    {
+      "role": "assistant",
+      "content": "I've got a few, my friend - I've lost count, but I think I have around 20-25 cars in my collection, and each one is a beauty in its own way!",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_025129_29.wav",
+      "duration": 7.894791666666666,
+      "generation_time": 39.20281529426575,
+      "llm_time": 0.3930995464324951,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T02:52:08.596083"
+    },
+    {
+      "role": "user",
+      "content": "sabes que messi es muy mas technico que tu ? ",
+      "timestamp": "2026-01-02T02:52:36.323511"
+    },
+    {
+      "role": "assistant",
+      "content": "¡Eso es una opinión, amigo! Creo que tengo mi propio estilo y técnica en el campo, y aunque Messi es un genio, no estoy seguro de que sea más técnico que yo, ¡la competencia es lo que hace que el fútbol sea emocionante, no?",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_025236_30.wav",
+      "duration": 12.399458333333333,
+      "generation_time": 35.24162435531616,
+      "llm_time": 0.4639415740966797,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T02:53:12.033078"
+    },
+    {
+      "role": "user",
+      "content": "dis moi une blague ",
+      "timestamp": "2026-01-02T02:53:55.990799"
+    },
+    {
+      "role": "user",
+      "content": "dis moi une blague",
+      "timestamp": "2026-01-02T02:55:11.811674"
+    },
+    {
+      "role": "assistant",
+      "content": "Je vais te dire une blague : Pourquoi j'ai toujours un ballon avec moi ? Parce que je suis attiré par les 'buts' de la vie !",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_025512_31.wav",
+      "duration": 5.99075,
+      "generation_time": 36.48756122589111,
+      "llm_time": 0.46994781494140625,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T02:55:48.774187"
+    },
+    {
+      "role": "user",
+      "content": "dis moi une autre blague",
+      "timestamp": "2026-01-02T03:01:51.544725"
+    },
+    {
+      "role": "assistant",
+      "content": "(amused) Ah, d'accord, mais je suis un footballeur, pas un comédien ! (laughing) Pourquoi est-ce qu'un ballon de foot est triste ? Parce qu'il est toujours dégonflé !",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_030152_32.wav",
+      "duration": 8.359208333333333,
+      "generation_time": 39.56153726577759,
+      "llm_time": 0.5514576435089111,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T03:02:31.663720"
+    },
+    {
+      "role": "user",
+      "content": "tell me on in portuguese",
+      "timestamp": "2026-01-02T03:06:26.152226"
+    },
+    {
+      "role": "assistant",
+      "content": "(amused) Ah, claro, vou te contar uma piada! (laughing) Por que o jogador de futebol levou uma escada para o campo? Porque ele queria elevar seu jogo!",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_030626_33.wav",
+      "duration": 7.7555,
+      "generation_time": 29.350340366363525,
+      "llm_time": 0.38451051712036133,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T03:06:55.892078"
+    },
+    {
+      "role": "user",
+      "content": "another one ",
+      "timestamp": "2026-01-02T03:07:32.342081"
+    },
+    {
+      "role": "assistant",
+      "content": "(chuckling) (amused) Qual é o time de futebol que começa com \"O\"? O time que não ganha nunca, porque sempre começa com \"O\" e não com \"V\"! (laughing)",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_030732_34.wav",
+      "duration": 7.058875,
+      "generation_time": 28.854607820510864,
+      "llm_time": 0.5128195285797119,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T03:08:01.713508"
+    },
+    {
+      "role": "user",
+      "content": "(chuckling) (amused) Qual é o time de futebol que começa com \"O\"? O time que não ganha nunca, porque sempre começa com \"O\" e não com \"V\"! (laughing) ahahah",
+      "timestamp": "2026-01-02T03:10:21.909738"
+    },
+    {
+      "role": "user",
+      "content": "Tinha rivalidade dentro do campo, mas depois disso a galera dos dois times se juntava, tomava cerveja. Então eu ficava brincando com os filhos dos outros jogadores e a gente ia fazendo amizade, né?",
+      "timestamp": "2026-01-02T04:21:55.182294"
+    },
+    {
+      "role": "user",
+      "content": "Tinha rivalidade dentro do campo, mas depois disso a galera dos dois times se juntava, tomava cerveja. Então eu ficava brincando com os filhos dos outros jogadores e a gente ia fazendo amizade, né?",
+      "timestamp": "2026-01-02T04:22:02.079989"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 48.8s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_042202_35.wav",
+      "duration": 12.817416666666666,
+      "generation_time": 48.83908748626709,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T04:22:50.925083"
+    },
+    {
+      "role": "user",
+      "content": "Tinha rivalidade dentro do campo, mas depois disso a galera dos dois times se juntava, tomava cerveja. Então eu ficava brincando com os filhos dos outros jogadores e a gente ia fazendo amizade, né?",
+      "timestamp": "2026-01-02T04:23:10.056451"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 30.2s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_042310_36.wav",
+      "duration": 8.405625,
+      "generation_time": 30.221518993377686,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T04:23:40.281972"
+    },
+    {
+      "role": "user",
+      "content": "(soft tone) Tinha rivalidade dentro do campo, mas depois disso a galera dos dois times se juntava, tomava cerveja. Então eu ficava brincando com os filhos dos outros jogadores e a gente ia fazendo amizade, né?",
+      "timestamp": "2026-01-02T04:24:14.049127"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 27.3s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_042414_37.wav",
+      "duration": 6.130083333333333,
+      "generation_time": 27.26152539253235,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T04:24:41.314921"
+    },
+    {
+      "role": "user",
+      "content": "(soft tone) Tinha rivalidade dentro do campo, mas depois disso a galera dos dois times se juntava, tomava cerveja. Então eu ficava brincando com os filhos dos outros jogadores e a gente ia fazendo amizade, né?",
+      "timestamp": "2026-01-02T04:25:30.766140"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 30.0s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_042530_38.wav",
+      "duration": 8.405625,
+      "generation_time": 30.04243302345276,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T04:26:00.813573"
+    },
+    {
+      "role": "user",
+      "content": "tell me a joke ",
+      "timestamp": "2026-01-02T04:26:30.197649"
+    },
+    {
+      "role": "assistant",
+      "content": "(laughing) (amused) Por que o futebolista levou uma escada para o campo? (pausing) Porque ele queria elevar seu jogo! (chuckling) Ah, eu sei, eu sei, é uma piada um pouco \"fora do jogo\", mas eu adorei! (laughing)",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_042630_39.wav",
+      "duration": 8.9165,
+      "generation_time": 31.20421862602234,
+      "llm_time": 0.48711061477661133,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T04:27:01.892983"
+    },
+    {
+      "role": "user",
+      "content": "dis moi une blague",
+      "timestamp": "2026-01-02T04:27:30.833689"
+    },
+    {
+      "role": "assistant",
+      "content": "(amused) (laughing) Pourquoi le footballeur est allé chez le coiffeur ? (pausing) Parce qu'il voulait une coupe de foot ! (chuckling) Haha, je sais, c'est une blague un peu \"décalée\", mais j'adore ! (souriant) Le football et l'humour, c'est une belle combinaison, n'est-ce pas ?",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_042731_40.wav",
+      "duration": 11.006291666666666,
+      "generation_time": 33.9403657913208,
+      "llm_time": 0.5769906044006348,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T04:28:05.356045"
+    },
+    {
+      "role": "user",
+      "content": "sabes tu que messi es el mejur de todos los tiempos ?",
+      "timestamp": "2026-01-02T04:29:05.198489"
+    },
+    {
+      "role": "user",
+      "content": "\n(soft tone) Tinha rivalidade dentro do campo, mas depois disso a galera dos dois times se juntava, tomava cerveja. Então eu ficava brincando com os filhos dos outros jogadores e a gente ia fazendo amizade, né?",
+      "timestamp": "2026-01-02T04:29:58.525862"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 38.0s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_042958_41.wav",
+      "duration": 7.337541666666667,
+      "generation_time": 37.98919486999512,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T04:30:36.519399"
+    },
+    {
+      "role": "user",
+      "content": "\n(soft tone) Tinha rivalidade dentro do campo, mas depois disso a galera dos dois times se juntava, tomava cerveja. Então eu ficava brincando com os filhos dos outros jogadores e a gente ia fazendo amizade, né? \nhermano Hahaha",
+      "timestamp": "2026-01-02T04:31:28.856991"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 27.7s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_043128_42.wav",
+      "duration": 5.897875,
+      "generation_time": 27.7255277633667,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T04:31:56.587520"
+    },
+    {
+      "role": "user",
+      "content": "\n(soft tone) Tinha rivalidade dentro do campo, mas depois disso a galera dos dois times se juntava, tomava cerveja. hermano Hahaha",
+      "timestamp": "2026-01-02T04:32:51.264324"
+    },
+    {
+      "role": "user",
+      "content": "(soft tone) Tinha rivalidade dentro do campo, mas depois disso a galera dos dois times se juntava, tomava cerveja. hermano Hahaha",
+      "timestamp": "2026-01-02T04:36:22.930944"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 26.5s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_043622_43.wav",
+      "duration": 5.758583333333333,
+      "generation_time": 26.54727554321289,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T04:36:49.483256"
+    },
+    {
+      "role": "user",
+      "content": "Por que o futebolista levou uma escada para o campo? (pausing) Porque ele queria elevar seu jogo! (chuckling) Ah, eu sei, eu sei, é uma piada um pouco \"fora do jogo\", mas eu adorei! (laughing)",
+      "timestamp": "2026-01-02T04:37:13.302341"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 29.7s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_043713_44.wav",
+      "duration": 8.080583333333333,
+      "generation_time": 29.732078313827515,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T04:37:43.040422"
+    },
+    {
+      "role": "user",
+      "content": " Eu acho que eu descobri mesmo que eu amo muito o futebol, viu? E depois de ficar tanto tempo parado ali, sem fazer praticamente, só treinando, né? Eu treinei bastante ali.",
+      "timestamp": "2026-01-02T04:40:25.839240"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 29.1s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_044025_45.wav",
+      "duration": 7.430416666666667,
+      "generation_time": 29.10761523246765,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T04:40:54.950583"
+    },
+    {
+      "role": "user",
+      "content": "Tinha rivalidade dentro do campo, mas depois disso a galera dos dois times se juntava, tomava cerveja. Então eu ficava brincando com os filhos dos outros jogadores e a gente ia fazendo amizade, né?\n",
+      "timestamp": "2026-01-02T04:41:48.352285"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 45.6s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_044148_46.wav",
+      "duration": 12.817416666666666,
+      "generation_time": 45.6082181930542,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T04:42:33.965502"
+    },
+    {
+      "role": "user",
+      "content": "\nEu acho que eu descobri mesmo que eu amo muito o futebol, viu? E depois de ficar tanto tempo parado ali, sem fazer praticamente, só treinando, né? Eu treinei bastante ali.",
+      "timestamp": "2026-01-02T04:43:25.382325"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 29.0s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_044325_47.wav",
+      "duration": 7.569708333333334,
+      "generation_time": 29.03767490386963,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T04:43:54.425508"
+    },
+    {
+      "role": "user",
+      "content": "E depois de ficar tanto tempo parado ali, sem fazer praticamente, só treinando, né? Eu treinei bastante ali.",
+      "timestamp": "2026-01-02T04:44:40.944570"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 27.3s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_044440_48.wav",
+      "duration": 6.362291666666667,
+      "generation_time": 27.297125101089478,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T04:45:08.249695"
+    },
+    {
+      "role": "user",
+      "content": "Tinha rivalidade dentro do campo, mas depois disso a galera dos dois times se juntava, tomava cerveja. Então eu ficava brincando com os filhos dos outros jogadores e a gente ia fazendo amizade, né?",
+      "timestamp": "2026-01-02T04:45:32.991427"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 34.3s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_044532_49.wav",
+      "duration": 11.192041666666666,
+      "generation_time": 34.34365367889404,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T04:46:07.340078"
+    },
+    {
+      "role": "user",
+      "content": "tell me your favourite brazilian meal ",
+      "timestamp": "2026-01-02T04:47:08.841939"
+    },
+    {
+      "role": "assistant",
+      "content": "(excited) Ah, que pergunta deliciosa! (smiling) Meu prato favorito brasileiro é feijoada, sem dúvida! (proud) Minha mãe faz a melhor feijoada do mundo, e quando estou em casa, é o que mais gosto de comer. (grateful) E não posso esquecer do arroz e do farofa, é a combinação perfeita! (satisfied) Feijoada é o coração da culinária brasileira, e eu amo!",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_044709_50.wav",
+      "duration": 16.346875,
+      "generation_time": 41.45126676559448,
+      "llm_time": 0.7036874294281006,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T04:47:51.000888"
+    },
+    {
+      "role": "user",
+      "content": "your favouritte actor ?",
+      "timestamp": "2026-01-02T04:56:17.704869"
+    },
+    {
+      "role": "assistant",
+      "content": "(excited) I'm a huge fan of Dwayne \"The Rock\" Johnson! (amused) His energy and charisma on screen are infectious, just like my moves on the pitch! (laughing)",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_045618_53.wav",
+      "duration": 7.894791666666666,
+      "generation_time": 39.032580614089966,
+      "llm_time": 0.350675106048584,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T04:56:57.093127"
+    },
+    {
+      "role": "user",
+      "content": "(excited) Ah, que pergunta deliciosa! (smiling) Meu prato favorito brasileiro é feijoada, sem dúvida! (proud) Minha mãe faz a melhor feijoada do mundo, e quando estou em casa, é o que mais gosto de comer. (grateful) E não posso esquecer do arroz e do farofa, é a combinação perfeita! (satisfied) Feijoada é o coração da culinária brasileira, e eu amo!",
+      "timestamp": "2026-01-02T04:57:18.301574"
+    },
+    {
+      "role": "assistant",
+      "content": "(joyful) Ah, feijoada é mesmo o prato que me faz sentir em casa! (proud) Minha mãe sempre me diz que a feijoada é feita com amor, e eu acredito nisso, porque quando como feijoada, sinto que estou sendo abraçado pela cultura brasileira! (grateful) E você, já comeu feijoada em um domingo de futebol, assistindo ao Brasil jogar? (excited) É a combinação perfeita!",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_045718_54.wav",
+      "duration": 18.111583333333332,
+      "generation_time": 44.003172159194946,
+      "llm_time": 0.647691011428833,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T04:58:02.959468"
     }
   ],
-  "generation_count": 27,
-  "last_updated": "2025-12-05T21:46:25.343667"
+  "generation_count": 55,
+  "last_updated": "2026-01-02T04:58:02.959468"
 }

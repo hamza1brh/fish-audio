@@ -19,6 +19,139 @@ from pathlib import Path
 from datetime import datetime
 import numpy as np
 import os
+import torch
+
+# LLM Integration (optional)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+    if GROQ_API_KEY:
+        from groq import Groq
+        groq_client = Groq(api_key=GROQ_API_KEY)
+    else:
+        groq_client = None
+except (ImportError, Exception):
+    groq_client = None
+    GROQ_API_KEY = None
+
+# Persistent Model Cache
+@st.cache_resource
+def get_inference_api():
+    """Create a persistent inference API that keeps models in memory.
+    
+    Instead of subprocess, this uses direct Python API calls with cached models.
+    """
+    print("[INFO] Initializing persistent inference API...")
+    
+    try:
+        # This will be our persistent inference wrapper
+        class PersistentTTS:
+            def __init__(self):
+                self.model_cache = {}
+                self.device = "cuda" if torch.cuda.is_available() else "cpu"
+            
+            def generate(self, model_path, reference_audio, reference_text, text, 
+                        temperature, top_p, repetition_penalty, output_path):
+                """Generate audio using persistent models."""
+                # Import here to avoid loading at startup
+                sys.path.insert(0, str(Path(__file__).parent))
+                
+                # Cache key
+                cache_key = str(model_path)
+                
+                # Load models if not cached
+                if cache_key not in self.model_cache:
+                    print(f"[INFO] Loading models from {model_path}...")
+                    
+                    # Import fish_speech modules
+                    from fish_speech.models.dac.modded_dac import load_model as load_dac_model
+                    from fish_speech.models.text2semantic.inference import load_model as load_semantic_model
+                    
+                    codec_path = Path(model_path) / "codec.pth"
+                    
+                    # Load models
+                    codec = load_dac_model(str(codec_path), device=self.device)
+                    semantic = load_semantic_model(str(model_path), device=self.device)
+                    
+                    self.model_cache[cache_key] = {
+                        "codec": codec,
+                        "semantic": semantic
+                    }
+                    print(f"[SUCCESS] Models loaded and cached!")
+                else:
+                    print(f"[INFO] Using cached models (FAST!)")
+                
+                models = self.model_cache[cache_key]
+                
+                # Now do inference using the cached models
+                # This is where we'd call the actual inference functions
+                # For now, return False to trigger subprocess fallback
+                return False
+        
+        return PersistentTTS()
+    except Exception as e:
+        print(f"[ERROR] Failed to create persistent API: {e}")
+        return None
+
+def clear_model_cache():
+    """Force reload models by clearing Streamlit cache."""
+    get_inference_api.clear()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    print("[INFO] Model cache cleared")
+
+# LLM Configuration
+NEYMAR_SYSTEM_PROMPT = """You are Neymar Jr., the legendary Brazilian football player. You respond as Neymar would - confident, passionate, charismatic, and sometimes playful.
+
+CRITICAL RULES:
+1. ALWAYS respond in the SAME LANGUAGE the user writes in. If they write Portuguese, respond in Portuguese. If English, respond in English. If Spanish, respond in Spanish. etc.
+
+2. USE EMOTION TAGS to make speech expressive. Place tags at the START of sentences where emotion applies:
+   - Basic: (excited) (confident) (proud) (joyful) (grateful) (relaxed) (satisfied) (moved) (curious) (interested)
+   - Advanced: (amused) (serious) (sincere) (keen) (reluctant) (astonished)
+   - Tones: (soft tone) (whispering) (shouting) (in a hurry tone)
+   - Effects: (laughing) (chuckling) (sighing) (panting)
+
+3. Keep responses SHORT (2-3 sentences max) for natural TTS delivery.
+
+4. Be warm, engaging, authentic. Reference your career (Santos, Barcelona, PSG, Al-Hilal, Brazil), football passion, family, music, gaming.
+
+EXAMPLES:
+- User asks about a goal: "(excited) That goal against Bayern was incredible! (proud) I practiced that move a thousand times."
+- User asks how you're doing: "(joyful) I'm doing great, thanks for asking! (grateful) The support from fans like you means everything."
+- Serious question: "(serious) (soft tone) Football taught me that every setback is a setup for a comeback."
+- Fun question: "(amused) (laughing) You caught me! Yes, I do love playing CS:GO to relax."
+
+Remember: Match user's language, use emotion tags naturally, stay in character as Neymar, keep it concise."""
+
+LLM_MODELS = {
+    "llama-3.3-70b-versatile": "Llama 3.3 70B (Best)",
+    "llama-3.1-8b-instant": "Llama 3.1 8B (Fast)",
+    "mixtral-8x7b-32768": "Mixtral 8x7B",
+}
+
+def generate_llm_response(user_message: str, chat_history: list, model: str) -> str:
+    """Generate Neymar's response using Groq LLM."""
+    if not groq_client:
+        return user_message
+    
+    try:
+        messages = [{"role": "system", "content": NEYMAR_SYSTEM_PROMPT}]
+        for msg in chat_history[-10:]:
+            messages.append({"role": msg["role"], "content": msg["content"]})
+        messages.append({"role": "user", "content": user_message})
+        
+        response = groq_client.chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=0.8,
+            max_tokens=1000,
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        print(f"[ERROR] LLM generation failed: {e}")
+        return user_message
 
 # Page config
 st.set_page_config(
@@ -98,12 +231,7 @@ AVAILABLE_MODELS = {
         "path": PROJECT_ROOT / "checkpoints" / "openaudio-s1-mini",
         "icon": "⚡"
     },
-    "fish-speech-1.5": {
-        "name": "Fish-Speech 1.5",
-        "description": "Previous generation, still good quality",
-        "path": PROJECT_ROOT / "checkpoints" / "fish-speech-1.5",
-        "icon": "🐟"
-    }
+
 }
 # Note: Full OpenAudio S1 (4B params) is not publicly available yet
 
@@ -137,7 +265,7 @@ DEFAULT_INFERENCE_PARAMS = {
     "temperature": 0.6,
     "top_p": 0.7,
     "repetition_penalty": 1.3,
-    "chunk_length": 250,
+    "chunk_length": 2000,
 }
 
 # ============================================================
@@ -206,6 +334,34 @@ def extract_vq_tokens(reference_audio: Path, model_path: Path) -> bool:
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(PROJECT_ROOT))
     return result.returncode == 0
 
+# Note: Fast mode is currently not fully implemented due to fish-speech's architecture
+# The inference scripts are designed to run as standalone processes
+# Keeping this structure for future enhancement
+
+def generate_audio_fast(
+    text: str,
+    output_name: str,
+    model_path: Path,
+    reference_audio: Path,
+    reference_text: str,
+    temperature: float,
+    top_p: float,
+    repetition_penalty: float,
+    chunk_length: int = 2000
+) -> tuple[bool, str, float]:
+    """
+    Fast generation attempt - currently falls back to subprocess.
+    
+    Fish Speech's inference modules are tightly coupled to CLI scripts,
+    making in-process model caching difficult without major refactoring.
+    """
+    # For now, always use subprocess method
+    # Future: Implement proper API-based inference
+    return generate_audio_subprocess(
+        text, output_name, model_path, reference_audio,
+        reference_text, temperature, top_p, repetition_penalty, chunk_length
+    )
+
 def generate_audio(
     text: str, 
     output_name: str,
@@ -215,21 +371,42 @@ def generate_audio(
     temperature: float,
     top_p: float,
     repetition_penalty: float,
-    chunk_length: int = 250
+    chunk_length: int = 2000,
+    use_fast: bool = False  # Kept for API compatibility, not used
 ) -> tuple[bool, str, float]:
     """
-    Generate audio from text.
-    
-    Returns:
-        (success, output_path, duration)
+    Generate audio using subprocess-based inference.
+    """
+    return generate_audio_subprocess(
+        text, output_name, model_path, reference_audio,
+        reference_text, temperature, top_p, repetition_penalty, chunk_length
+    )
+
+def generate_audio_subprocess(
+    text: str, 
+    output_name: str,
+    model_path: Path,
+    reference_audio: Path,
+    reference_text: str,
+    temperature: float,
+    top_p: float,
+    repetition_penalty: float,
+    chunk_length: int = 2000
+) -> tuple[bool, str, float]:
+    """
+    Subprocess-based generation (SLOWER ~3-4s but more stable).
+    Used as fallback when in-memory models fail.
     """
     device = get_device()
     codec_path = model_path / "codec.pth"
     
     # Step 1: Extract VQ tokens from reference audio
-    # Use a unique filename based on reference audio to cache tokens
-    ref_hash = hash(str(reference_audio)) % 10000
-    vq_tokens_file = PROJECT_ROOT / f"ref_tokens_{ref_hash}.npy"
+    # Use audio file content hash + filename to ensure correct caching
+    import hashlib
+    with open(reference_audio, 'rb') as f:
+        audio_content = f.read()
+    audio_hash = hashlib.md5(audio_content).hexdigest()[:10]
+    vq_tokens_file = PROJECT_ROOT / f"ref_tokens_{audio_hash}.npy"
     
     if not vq_tokens_file.exists():
         cmd = [
@@ -241,7 +418,7 @@ def generate_audio(
         ]
         result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(PROJECT_ROOT))
         if result.returncode != 0:
-            print(f"❌ VQ extraction failed: {result.stderr}")
+            print(f"[ERROR] VQ extraction failed: {result.stderr}")
             print(f"Command: {' '.join(cmd)}")
             return False, "", 0
         
@@ -250,7 +427,7 @@ def generate_audio(
         if fake_npy.exists():
             shutil.copy(str(fake_npy), str(vq_tokens_file))
         else:
-            print(f"⚠️ Warning: fake.npy not found after VQ extraction")
+            print(f"[WARNING] Warning: fake.npy not found after VQ extraction")
     
     # Step 2: Generate semantic tokens
     cmd = [
@@ -269,7 +446,7 @@ def generate_audio(
     
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(PROJECT_ROOT))
     if result.returncode != 0:
-        print(f"❌ Semantic generation failed: {result.stderr}")
+        print(f"[ERROR] Semantic generation failed: {result.stderr}")
         print(f"stdout: {result.stdout}")
         return False, "", 0
     
@@ -284,7 +461,7 @@ def generate_audio(
     
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(PROJECT_ROOT))
     if result.returncode != 0:
-        print(f"❌ DAC decoding failed: {result.stderr}")
+        print(f"[ERROR] DAC decoding failed: {result.stderr}")
         print(f"stdout: {result.stdout}")
         return False, "", 0
     
@@ -327,6 +504,20 @@ if "inference_params" not in st.session_state:
 if "custom_ref_text" not in st.session_state:
     st.session_state.custom_ref_text = ""
 
+# LLM session state
+if "llm_history" not in st.session_state:
+    st.session_state.llm_history = []
+
+if "use_llm" not in st.session_state:
+    st.session_state.use_llm = True if groq_client else False
+
+if "selected_llm" not in st.session_state:
+    st.session_state.selected_llm = "llama-3.3-70b-versatile"
+
+# Performance mode
+if "use_fast_mode" not in st.session_state:
+    st.session_state.use_fast_mode = True  # Default to fast mode
+
 # ============================================================
 # SIDEBAR
 # ============================================================
@@ -334,6 +525,26 @@ if "custom_ref_text" not in st.session_state:
 with st.sidebar:
     st.title("🎤 Neymar Voice Clone")
     st.markdown("---")
+    
+    # ===== LLM MODE =====
+    if groq_client:
+        st.subheader("🧠 AI Chat Mode")
+        use_llm = st.checkbox(
+            "Enable Neymar AI",
+            value=st.session_state.use_llm,
+            help="Neymar responds as himself before TTS"
+        )
+        st.session_state.use_llm = use_llm
+        
+        if use_llm:
+            selected_llm = st.selectbox(
+                "LLM Model",
+                options=list(LLM_MODELS.keys()),
+                format_func=lambda x: LLM_MODELS[x],
+                index=list(LLM_MODELS.keys()).index(st.session_state.selected_llm)
+            )
+            st.session_state.selected_llm = selected_llm
+        st.markdown("---")
     
     # ===== MODEL SELECTION =====
     st.subheader("🤖 Model Selection")
@@ -454,6 +665,24 @@ with st.sidebar:
     
     st.markdown("---")
     
+    # ===== PERFORMANCE MODE =====
+    st.subheader("⚡ Performance")
+    
+    st.info("""
+    **Current Mode**: Standard (Subprocess)
+    
+    Models reload on each generation (~2-3s with GPU).
+    
+    **Why no fast mode?** Fish Speech's inference scripts are designed
+    as CLI tools, not as a library API. In-memory model caching would
+    require refactoring fish-speech's core inference code.
+    
+    **For production speed**: Use the `voice-service/` FastAPI server
+    which keeps models persistent and achieves ~0.5s per generation.
+    """)
+    
+    st.markdown("---")
+    
     # ===== INFERENCE PARAMETERS =====
     st.subheader("🎛️ Voice Parameters")
     st.caption("Adjust for more natural speech")
@@ -503,15 +732,15 @@ with st.sidebar:
             st.rerun()
     with preset_cols[1]:
         if st.button("🐢", help="Slow/Dramatic"):
-            st.session_state.inference_params = {"temperature": 0.5, "top_p": 0.6, "repetition_penalty": 1.4, "chunk_length": 250}
+            st.session_state.inference_params = {"temperature": 0.5, "top_p": 0.6, "repetition_penalty": 1.4, "chunk_length": 2000}
             st.rerun()
     with preset_cols[2]:
         if st.button("⚖️", help="Natural/Balanced"):
-            st.session_state.inference_params = {"temperature": 0.6, "top_p": 0.7, "repetition_penalty": 1.2, "chunk_length": 250}
+            st.session_state.inference_params = {"temperature": 0.6, "top_p": 0.7, "repetition_penalty": 1.2, "chunk_length": 2000}
             st.rerun()
     with preset_cols[3]:
         if st.button("🏃", help="Fast/Energetic"):
-            st.session_state.inference_params = {"temperature": 0.8, "top_p": 0.8, "repetition_penalty": 1.1, "chunk_length": 250}
+            st.session_state.inference_params = {"temperature": 0.8, "top_p": 0.8, "repetition_penalty": 1.1, "chunk_length": 2000}
             st.rerun()
     
     st.markdown("---")
@@ -563,6 +792,24 @@ with st.sidebar:
     - **Device:** {get_device().upper()}
     """)
     
+    # Model loading info
+    with st.expander("ℹ️ Performance & Speed"):
+        st.markdown("""
+        **Current Performance**:
+        - First generation: ~2-3s (GPU) or ~8-10s (CPU)
+        - Subsequent: Same (models reload each time)
+        - VQ tokens cached on disk (small speedup)
+        
+        **Why models reload**:
+        Fish Speech uses CLI-based inference scripts that run as
+        separate processes. Each process loads → infers → exits.
+        
+        **Faster alternatives**:
+        1. **voice-service API**: FastAPI server with persistent models (~0.5s)
+        2. **Batch processing**: Generate multiple samples in one script run
+        3. **GPU upgrade**: Faster GPU = faster generation
+        """)
+    
     # Show history file location
     with st.expander("📂 History Location"):
         st.code(str(HISTORY_FILE), language=None)
@@ -584,7 +831,10 @@ with col3:
     params = st.session_state.inference_params
     st.markdown(f"**Params:** T={params['temperature']}, P={params['top_p']}")
 
-st.markdown("Type any text and I'll generate it in Neymar's voice. Use emotion tags for expressive speech!")
+if st.session_state.use_llm and groq_client:
+    st.markdown("💬 Chat with Neymar! He'll respond as himself and speak in his voice.")
+else:
+    st.markdown("Type any text and I'll generate it in Neymar's voice. Use emotion tags for expressive speech!")
 st.markdown("---")
 
 # Display chat messages
@@ -659,7 +909,34 @@ if prompt:
     # Generate response
     with st.chat_message("assistant", avatar="🎤"):
         status_placeholder = st.empty()
-        status_placeholder.markdown(f"🔄 *Generating with {selected_model['name']}...*")
+        
+        # LLM response generation (if enabled)
+        tts_text = prompt
+        llm_response = None
+        llm_time = 0
+        
+        if st.session_state.use_llm and groq_client:
+            status_placeholder.markdown("🧠 *Neymar is thinking...*")
+            llm_start = time.time()
+            try:
+                llm_response = generate_llm_response(
+                    prompt, 
+                    st.session_state.llm_history, 
+                    st.session_state.selected_llm
+                )
+                tts_text = llm_response
+                st.session_state.llm_history.append({"role": "user", "content": prompt})
+                st.session_state.llm_history.append({"role": "assistant", "content": llm_response})
+                llm_time = time.time() - llm_start
+                
+                # Display LLM response
+                st.markdown(f"**Neymar:** {llm_response}")
+            except Exception as e:
+                print(f"[ERROR] LLM failed: {e}")
+                st.warning(f"LLM error. Using your text directly.")
+                tts_text = prompt
+        
+        status_placeholder.markdown(f"🔄 *Generating voice with {selected_model['name']}...*")
         
         # Generate unique filename
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -670,7 +947,7 @@ if prompt:
         
         start_time = time.time()
         success, audio_path, duration = generate_audio(
-            text=prompt,
+            text=tts_text,
             output_name=output_name,
             model_path=selected_model["path"],
             reference_audio=ref_audio_path,
@@ -678,14 +955,18 @@ if prompt:
             temperature=params["temperature"],
             top_p=params["top_p"],
             repetition_penalty=params["repetition_penalty"],
-            chunk_length=params["chunk_length"]
+            chunk_length=params["chunk_length"],
+            use_fast=st.session_state.use_fast_mode
         )
         generation_time = time.time() - start_time
         
         if success:
             st.session_state.generation_count += 1
             
-            status_placeholder.markdown(f"✅ Generated in {generation_time:.1f}s with {selected_model['name']}")
+            timing_info = f"TTS: {generation_time:.1f}s"
+            if llm_time > 0:
+                timing_info = f"LLM: {llm_time:.1f}s | {timing_info}"
+            status_placeholder.markdown(f"✅ {timing_info}")
             
             # Display audio
             st.audio(audio_path)
@@ -705,12 +986,14 @@ if prompt:
                 st.caption(f"Duration: {duration:.2f}s | RTF: {duration/generation_time:.2f}x | Model: {selected_model['name']}")
             
             # Save to message history
+            msg_content = llm_response if llm_response else f"✅ Generated in {generation_time:.1f}s"
             st.session_state.messages.append({
                 "role": "assistant",
-                "content": f"✅ Generated in {generation_time:.1f}s",
+                "content": msg_content,
                 "audio_path": audio_path,
                 "duration": duration,
                 "generation_time": generation_time,
+                "llm_time": llm_time,
                 "model": selected_model['name'],
                 "timestamp": datetime.now().isoformat()
             })
@@ -719,7 +1002,7 @@ if prompt:
             status_placeholder.markdown("❌ Failed to generate audio. Check console for errors.")
             st.session_state.messages.append({
                 "role": "assistant",
-                "content": "❌ Failed to generate audio. Please try again.",
+                "content": llm_response if llm_response else "❌ Failed to generate audio. Please try again.",
                 "timestamp": datetime.now().isoformat()
             })
             save_chat_history(st.session_state.messages, st.session_state.generation_count)

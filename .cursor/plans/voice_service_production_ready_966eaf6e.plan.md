@@ -72,9 +72,3 @@ class RequestBatcher:
 **Update**: [`src/inference/engine.py`](voice-service/src/inference/engine.py)Add `generate_batch()` method for processing multiple requests.
 
 ### 3. Real GPU Tests
-
-**New files** in `tests/`:
-
-- `test_gpu_inference.py` - Real model inference tests
-- `test_batching.py` - Batching correctness and performance
-- `test_benchmark.py` - Throughput benchmarks
