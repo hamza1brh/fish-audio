@@ -153,15 +153,20 @@ def main():
     print("=" * 60)
     
     try:
-        result = subprocess.run([
-            sys.executable, "-c",
-            "import torch; "
-            "print(f'PyTorch: {torch.__version__}'); "
-            "print(f'CUDA Available: {torch.cuda.is_available()}'); "
-            "print(f'CUDA Version: {torch.version.cuda if torch.cuda.is_available() else \"N/A\"}'); "
-            "print(f'Device: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"CPU\"}'); "
-            "if torch.cuda.is_available(): print(f'Compute Capability: sm_{torch.cuda.get_device_capability(0)[0]}{torch.cuda.get_device_capability(0)[1]}')"
-        ], check=True, text=True, capture_output=True)
+        verify_code = """import torch
+print(f'PyTorch: {torch.__version__}')
+print(f'CUDA Available: {torch.cuda.is_available()}')
+if torch.cuda.is_available():
+    print(f'CUDA Version: {torch.version.cuda}')
+    print(f'Device: {torch.cuda.get_device_name(0)}')
+    cap = torch.cuda.get_device_capability(0)
+    print(f'Compute Capability: sm_{cap[0]}{cap[1]}')
+else:
+    print('CUDA Version: N/A')
+    print('Device: CPU')
+"""
+        result = subprocess.run([sys.executable, "-c", verify_code], 
+                               check=True, text=True, capture_output=True)
         
         print(result.stdout)
         

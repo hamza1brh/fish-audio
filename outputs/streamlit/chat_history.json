@@ -881,8 +881,28 @@
       "llm_time": 0.647691011428833,
       "model": "OpenAudio S1-mini",
       "timestamp": "2026-01-02T04:58:02.959468"
+    },
+    {
+      "role": "user",
+      "content": "(joyful) Ah, feijoada é mesmo o prato que me faz sentir em casa! (proud) Minha mãe sempre me diz que a feijoada é feita com amor, e eu acredito nisso, porque quando como feijoada, sinto que estou sendo abraçado pela cultura brasileira! (grateful) E você, já comeu feijoada em um domingo de futebol, assistindo ao Brasil jogar? (excited) É a combinação perfeita!",
+      "timestamp": "2026-01-02T22:36:15.326844"
+    },
+    {
+      "role": "user",
+      "content": "(joyful) Ah, feijoada é mesmo o prato que me faz sentir em casa! (proud) Minha mãe sempre me diz que a feijoada é feita com amor, e eu acredito nisso, porque quando como feijoada, sinto que estou sendo abraçado pela cultura brasileira! (grateful) E você, já comeu feijoada em um domingo de futebol, assistindo ao Brasil jogar? (excited) É a combinação perfeita!",
+      "timestamp": "2026-01-02T22:36:26.333499"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 65.2s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260102_223626_55.wav",
+      "duration": 19.365458333333333,
+      "generation_time": 65.24682855606079,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-02T22:37:31.587330"
     }
   ],
-  "generation_count": 55,
-  "last_updated": "2026-01-02T04:58:02.959468"
+  "generation_count": 56,
+  "last_updated": "2026-01-02T22:37:31.587330"
 }
