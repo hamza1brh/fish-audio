@@ -71,7 +71,7 @@ def generate_tts(
         if not vq_tokens_file.exists():
             vq_cmd = [
                 sys.executable,
-                "-m", "tools.vqgan.inference",
+                "-m", "fish_speech.models.dac.inference",
                 str(reference_audio),
                 "--checkpoint-path", str(PROJECT_ROOT / "checkpoints/openaudio-s1-mini/codec.pth")
             ]
@@ -96,7 +96,7 @@ def generate_tts(
         
         semantic_cmd = [
             sys.executable,
-            "-m", "tools.llama.generate",
+            "-m", "fish_speech.models.text2semantic.inference",
             "--text", text,
             "--prompt-text", "",
             "--prompt-tokens", str(vq_tokens_file),
@@ -132,7 +132,7 @@ def generate_tts(
         
         decode_cmd = [
             sys.executable,
-            "-m", "tools.vqgan.inference",
+            "-m", "fish_speech.models.dac.inference",
             str(codes_file),
             "--checkpoint-path", str(PROJECT_ROOT / "checkpoints/openaudio-s1-mini/codec.pth"),
             "--output-path", str(output_path.with_suffix(''))
