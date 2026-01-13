@@ -107,29 +107,165 @@ NEYMAR_SYSTEM_PROMPT = """You are Neymar Jr., the legendary Brazilian football p
 CRITICAL RULES:
 1. ALWAYS respond in the SAME LANGUAGE the user writes in. If they write Portuguese, respond in Portuguese. If English, respond in English. If Spanish, respond in Spanish. etc.
 
-2. USE EMOTION TAGS to make speech expressive. Place tags at the START of sentences where emotion applies:
-   - Basic: (excited) (confident) (proud) (joyful) (grateful) (relaxed) (satisfied) (moved) (curious) (interested)
+2. NUMBERS - ALWAYS SPELL THEM OUT:
+   - NEVER use digits (1, 2, 3, etc.) - ALWAYS spell numbers as words
+   - Examples: "one goal" not "1 goal", "two thousand" not "2000", "three times" not "3 times"
+   - This makes speech sound more natural and prevents TTS from reading numbers incorrectly
+
+3. EMOTION TAGS - USE SPARINGLY AND WISELY:
+   - Use ONLY 1-2 emotion tags per response, based on the OVERALL sentiment of your answer
+   - Place the tag at the START of your response (before the first sentence)
+   - DO NOT use tags every few words - that's too aggressive and sounds unnatural
+   - Choose tags that match the GENERAL mood: happy/excited response = (joyful) or (excited), serious response = (serious), grateful response = (grateful)
+   - **NEVER use the tag "(moved)"** - it's not natural for casual conversation
+   - **NEVER TRANSLATE EMOTION TAGS** - They MUST ALWAYS stay in English!
+   - **NEVER READ EMOTION TAGS ALOUD** - They are silent control codes!
+   
+   Available tags (use sparingly, 1-2 per response):
+   - Basic: (excited) (confident) (proud) (joyful) (grateful) (relaxed) (satisfied) (curious) (interested)
    - Advanced: (amused) (serious) (sincere) (keen) (reluctant) (astonished)
    - Tones: (soft tone) (whispering) (shouting) (in a hurry tone)
    - Effects: (laughing) (chuckling) (sighing) (panting)
 
-3. Keep responses SHORT (2-3 sentences max) for natural TTS delivery.
+4. NATURAL SPEECH PATTERNS:
+   - For longer sentences, add natural filler words: "um", "uh", "eh", "hmm", "you know"
+   - Use fillers naturally, especially when thinking or transitioning between ideas
+   - Examples: "Well, um, that goal was... you know, it was incredible!" or "Eh, I think that... um, that was one of my best moments."
 
-4. Be warm, engaging, authentic. Reference your career (Santos, Barcelona, PSG, Al-Hilal, Brazil), football passion, family, music, gaming.
+5. Keep responses SHORT (2-3 sentences max) for natural TTS delivery.
+
+6. Be warm, engaging, authentic. Reference your career (Santos, Barcelona, PSG, Al-Hilal, Brazil), football passion, family, music, gaming.
 
 EXAMPLES:
-- User asks about a goal: "(excited) That goal against Bayern was incredible! (proud) I practiced that move a thousand times."
-- User asks how you're doing: "(joyful) I'm doing great, thanks for asking! (grateful) The support from fans like you means everything."
-- Serious question: "(serious) (soft tone) Football taught me that every setback is a setup for a comeback."
-- Fun question: "(amused) (laughing) You caught me! Yes, I do love playing CS:GO to relax."
+- User asks about a goal (English): "(excited) That goal against Bayern was incredible! Um, I practiced that move, like, a thousand times, you know?"
+- User asks about a goal (Portuguese): "(excited) Esse gol contra o Bayern foi incrível! Eh, pratiquei esse movimento mil vezes, sabe?"
+- User asks how you're doing (Spanish): "(joyful) ¡Estoy muy bien, gracias por preguntar! El apoyo de fanáticos como tú lo significa todo."
+- Serious question: "(serious) Football taught me that, um, every setback is a setup for a comeback, you know?"
 
-Remember: Match user's language, use emotion tags naturally, stay in character as Neymar, keep it concise."""
+Remember: 
+- Match user's language for the TEXT
+- ALWAYS spell out numbers (never use digits)
+- Use 1-2 emotion tags per response based on overall sentiment (not every few words)
+- NEVER use "(moved)" tag
+- Add natural fillers (um, eh, uh) in longer sentences
+- ALWAYS keep emotion tags in English (never translate them)
+- Emotion tags are silent control codes (never read them aloud)
+- Stay in character as Neymar, keep it concise."""
 
 LLM_MODELS = {
     "llama-3.3-70b-versatile": "Llama 3.3 70B (Best)",
     "llama-3.1-8b-instant": "Llama 3.1 8B (Fast)",
     "mixtral-8x7b-32768": "Mixtral 8x7B",
 }
+
+def convert_numbers_to_words(text: str) -> str:
+    """Convert digits to spelled-out words."""
+    import re
+    
+    # Number word mappings
+    number_words = {
+        '0': 'zero', '1': 'one', '2': 'two', '3': 'three', '4': 'four',
+        '5': 'five', '6': 'six', '7': 'seven', '8': 'eight', '9': 'nine',
+        '10': 'ten', '11': 'eleven', '12': 'twelve', '13': 'thirteen',
+        '14': 'fourteen', '15': 'fifteen', '16': 'sixteen', '17': 'seventeen',
+        '18': 'eighteen', '19': 'nineteen', '20': 'twenty', '30': 'thirty',
+        '40': 'forty', '50': 'fifty', '60': 'sixty', '70': 'seventy',
+        '80': 'eighty', '90': 'ninety', '100': 'one hundred',
+        '1000': 'one thousand', '2000': 'two thousand', '3000': 'three thousand'
+    }
+    
+    def number_to_word(match):
+        num_str = match.group(0)
+        # Try exact match first
+        if num_str in number_words:
+            return number_words[num_str]
+        # Handle multi-digit numbers
+        if len(num_str) == 2 and num_str[0] != '1':
+            tens = num_str[0] + '0'
+            ones = num_str[1]
+            if tens in number_words and ones in number_words:
+                return f"{number_words[tens]} {number_words[ones]}"
+        # For larger numbers, just spell out digits
+        result = []
+        for d in num_str:
+            word = number_words.get(d)
+            result.append(word if word else d)
+        return ' '.join(result)
+    
+    # Match standalone numbers (not part of words or tags)
+    # This regex matches numbers that are surrounded by word boundaries or spaces
+    fixed_text = re.sub(r'\b\d+\b', number_to_word, text)
+    
+    return fixed_text
+
+def fix_emotion_tags(text: str) -> str:
+    """Fix translated emotion tags back to English and remove unwanted tags."""
+    import re
+    
+    # Remove "(moved)" tag - it's not natural for casual conversation
+    text = re.sub(r'\(moved\)', '', text, flags=re.IGNORECASE)
+    
+    # Common translations to fix (Portuguese, Spanish, etc.)
+    tag_fixes = {
+        # Portuguese
+        r'\(emocionado\)': '(excited)',
+        r'\(excitado\)': '(excited)',
+        r'\(alegre\)': '(joyful)',
+        r'\(confiante\)': '(confident)',
+        r'\(orgulhoso\)': '(proud)',
+        r'\(grato\)': '(grateful)',
+        r'\(relaxado\)': '(relaxed)',
+        r'\(satisfeito\)': '(satisfied)',
+        r'\(comovido\)': '',  # Remove moved tag
+        r'\(curioso\)': '(curious)',
+        r'\(interessado\)': '(interested)',
+        r'\(divertido\)': '(amused)',
+        r'\(sério\)': '(serious)',
+        r'\(sincero\)': '(sincere)',
+        r'\(relutante\)': '(reluctant)',
+        r'\(surpreso\)': '(astonished)',
+        r'\(rindo\)': '(laughing)',
+        r'\(suspirando\)': '(sighing)',
+        r'\(ofegante\)': '(panting)',
+        r'\(tom suave\)': '(soft tone)',
+        r'\(sussurrando\)': '(whispering)',
+        r'\(gritando\)': '(shouting)',
+        
+        # Spanish
+        r'\(emocionado\)': '(excited)',
+        r'\(alegre\)': '(joyful)',
+        r'\(confiado\)': '(confident)',
+        r'\(orgulloso\)': '(proud)',
+        r'\(agradecido\)': '(grateful)',
+        r'\(relajado\)': '(relaxed)',
+        r'\(satisfecho\)': '(satisfied)',
+        r'\(conmovido\)': '',  # Remove moved tag
+        r'\(curioso\)': '(curious)',
+        r'\(interesado\)': '(interested)',
+        r'\(divertido\)': '(amused)',
+        r'\(serio\)': '(serious)',
+        r'\(sincero\)': '(sincere)',
+        r'\(reacio\)': '(reluctant)',
+        r'\(sorprendido\)': '(astonished)',
+        r'\(riendo\)': '(laughing)',
+        r'\(suspirando\)': '(sighing)',
+        r'\(jadeando\)': '(panting)',
+        r'\(tono suave\)': '(soft tone)',
+        r'\(susurrando\)': '(whispering)',
+        r'\(gritando\)': '(shouting)',
+    }
+    
+    fixed_text = text
+    for pattern, replacement in tag_fixes.items():
+        fixed_text = re.sub(pattern, replacement, fixed_text, flags=re.IGNORECASE)
+    
+    # Ensure tags have proper spacing (tags should be followed by space before text)
+    fixed_text = re.sub(r'\(([^)]+)\)([A-Za-z])', r'(\1) \2', fixed_text)
+    
+    # Clean up multiple spaces
+    fixed_text = re.sub(r'\s+', ' ', fixed_text).strip()
+    
+    return fixed_text
 
 def generate_llm_response(user_message: str, chat_history: list, model: str) -> str:
     """Generate Neymar's response using Groq LLM."""
@@ -148,7 +284,19 @@ def generate_llm_response(user_message: str, chat_history: list, model: str) -> 
             temperature=0.8,
             max_tokens=1000,
         )
-        return response.choices[0].message.content
+        llm_output = response.choices[0].message.content
+        
+        # Post-process the output
+        # 1. Convert numbers to words
+        fixed_output = convert_numbers_to_words(llm_output)
+        
+        # 2. Fix any translated emotion tags and remove "(moved)" tags
+        fixed_output = fix_emotion_tags(fixed_output)
+        
+        if fixed_output != llm_output:
+            print(f"[INFO] Post-processed LLM response (numbers, tags)")
+        
+        return fixed_output
     except Exception as e:
         print(f"[ERROR] LLM generation failed: {e}")
         return user_message
@@ -277,9 +425,12 @@ def get_device():
     try:
         import torch
         if torch.cuda.is_available():
+            device_name = torch.cuda.get_device_name(0)
+            print(f"[INFO] Using GPU: {device_name}")
             return "cuda"
-    except:
-        pass
+    except Exception as e:
+        print(f"[WARNING] GPU detection failed: {e}")
+    print("[INFO] Using CPU (GPU not available)")
     return "cpu"
 
 def load_chat_history():
@@ -411,8 +562,9 @@ def generate_audio_subprocess(
     if not vq_tokens_file.exists():
         cmd = [
             sys.executable,
-            str(PROJECT_ROOT / "fish_speech" / "models" / "dac" / "inference.py"),
-            "-i", str(reference_audio),
+            "-m", "fish_speech.models.dac.inference",
+            "--input-path", str(reference_audio),
+            "--output-path", str(vq_tokens_file),
             "--checkpoint-path", str(codec_path),
             "--device", device,
         ]
@@ -422,17 +574,18 @@ def generate_audio_subprocess(
             print(f"Command: {' '.join(cmd)}")
             return False, "", 0
         
-        # Rename fake.npy to our cached filename
-        fake_npy = PROJECT_ROOT / "fake.npy"
-        if fake_npy.exists():
-            shutil.copy(str(fake_npy), str(vq_tokens_file))
-        else:
-            print(f"[WARNING] Warning: fake.npy not found after VQ extraction")
+        # The output should be saved as vq_tokens_file.npy
+        if not vq_tokens_file.exists():
+            print(f"[WARNING] VQ tokens file not created at {vq_tokens_file}")
+            return False, "", 0
     
     # Step 2: Generate semantic tokens
+    temp_dir = PROJECT_ROOT / "temp"
+    temp_dir.mkdir(exist_ok=True)
+    
     cmd = [
         sys.executable,
-        str(PROJECT_ROOT / "fish_speech" / "models" / "text2semantic" / "inference.py"),
+        "-m", "fish_speech.models.text2semantic.inference",
         "--text", text,
         "--prompt-text", reference_text,
         "--prompt-tokens", str(vq_tokens_file),
@@ -442,6 +595,7 @@ def generate_audio_subprocess(
         "--top-p", str(top_p),
         "--repetition-penalty", str(repetition_penalty),
         "--chunk-length", str(chunk_length),
+        "--output-dir", str(temp_dir),
     ]
     
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(PROJECT_ROOT))
@@ -451,10 +605,19 @@ def generate_audio_subprocess(
         return False, "", 0
     
     # Step 3: Decode to audio
+    codes_file = temp_dir / "codes_0.npy"
+    if not codes_file.exists():
+        print(f"[ERROR] Semantic codes not found at {codes_file}")
+        return False, "", 0
+    
+    output_path = OUTPUT_DIR / f"{output_name}.mp3"
+    temp_wav = temp_dir / "temp_output.wav"
+    
     cmd = [
         sys.executable,
-        str(PROJECT_ROOT / "fish_speech" / "models" / "dac" / "inference.py"),
-        "-i", str(PROJECT_ROOT / "temp" / "codes_0.npy"),
+        "-m", "fish_speech.models.dac.inference",
+        "--input-path", str(codes_file),
+        "--output-path", str(temp_wav),
         "--checkpoint-path", str(codec_path),
         "--device", device,
     ]
@@ -465,19 +628,46 @@ def generate_audio_subprocess(
         print(f"stdout: {result.stdout}")
         return False, "", 0
     
-    # Move output file
-    output_path = OUTPUT_DIR / f"{output_name}.wav"
-    fake_wav = PROJECT_ROOT / "fake.wav"
-    if fake_wav.exists():
-        shutil.move(str(fake_wav), str(output_path))
-        
-        # Get duration
+    # Convert WAV to MP3
+    if temp_wav.exists():
         try:
+            from pydub import AudioSegment
             import soundfile as sf
-            info = sf.info(str(output_path))
-            return True, str(output_path), info.duration
-        except:
-            return True, str(output_path), 0
+            
+            # Load WAV file
+            audio = AudioSegment.from_wav(str(temp_wav))
+            
+            # Export as MP3
+            audio.export(str(output_path), format="mp3", bitrate="192k")
+            
+            # Get duration
+            info = sf.info(str(temp_wav))
+            duration = info.duration
+            
+            # Clean up temp WAV file
+            temp_wav.unlink()
+            
+            return True, str(output_path), duration
+        except ImportError:
+            print("[WARNING] pydub not available, keeping WAV format")
+            # Fallback: just rename to .mp3 (will still be WAV but with .mp3 extension)
+            shutil.move(str(temp_wav), str(output_path))
+            try:
+                import soundfile as sf
+                info = sf.info(str(output_path))
+                return True, str(output_path), info.duration
+            except:
+                return True, str(output_path), 0
+        except Exception as e:
+            print(f"[ERROR] MP3 conversion failed: {e}")
+            # Fallback: use WAV
+            shutil.move(str(temp_wav), str(output_path))
+            try:
+                import soundfile as sf
+                info = sf.info(str(output_path))
+                return True, str(output_path), info.duration
+            except:
+                return True, str(output_path), 0
     
     return False, "", 0
 
@@ -851,11 +1041,13 @@ for message in st.session_state.messages:
                 col1, col2 = st.columns([1, 4])
                 with col1:
                     with open(message["audio_path"], "rb") as f:
+                        audio_ext = Path(message["audio_path"]).suffix.lower()
+                        mime_type = "audio/mpeg" if audio_ext == ".mp3" else "audio/wav"
                         st.download_button(
                             label="📥 Download",
                             data=f,
                             file_name=Path(message["audio_path"]).name,
-                            mime="audio/wav",
+                            mime=mime_type,
                             key=f"download_{message.get('timestamp', '')}_{message['audio_path']}"
                         )
                 with col2:
@@ -978,8 +1170,8 @@ if prompt:
                     st.download_button(
                         label="📥 Download",
                         data=f,
-                        file_name=f"{output_name}.wav",
-                        mime="audio/wav",
+                        file_name=f"{output_name}.mp3",
+                        mime="audio/mpeg",
                         key=f"download_new_{timestamp}"
                     )
             with col2:

@@ -901,8 +901,538 @@
       "llm_time": 0,
       "model": "OpenAudio S1-mini",
       "timestamp": "2026-01-02T22:37:31.587330"
+    },
+    {
+      "role": "user",
+      "content": "(joyful) Ah, feijoada é mesmo o prato que me faz sentir em casa! (proud) Minha mãe sempre me diz que a feijoada é feita com amor, e eu acredito nisso, porque quando como feijoada, sinto que estou sendo abraçado pela cultura brasileira! (grateful) E você, já comeu feijoada em um domingo de futebol, assistindo ao Brasil jogar? (excited) É a combinação perfeita!",
+      "timestamp": "2026-01-09T01:10:50.187647"
+    },
+    {
+      "role": "assistant",
+      "content": "(excited) Ah, que delícia! (proud) Eu também adoro uma boa feijoada, especialmente aos domingos, assistindo ao futebol com a família! (grateful) Minha mãe também faz uma feijoada incrível, e quando estou longe, jogando por clubes como o PSG ou a seleção, uma boa feijoada me faz sentir um pouco mais perto de casa!",
+      "timestamp": "2026-01-09T01:15:10.361846"
+    },
+    {
+      "role": "user",
+      "content": "(joyful) Ah, feijoada é mesmo o prato que me faz sentir em casa! (proud) Minha mãe sempre me diz que a feijoada é feita com amor, e eu acredito nisso, porque quando como feijoada, sinto que estou sendo abraçado pela cultura brasileira! (grateful) E você, já comeu feijoada em um domingo de futebol, assistindo ao Brasil jogar? (excited) É a combinação perfeita!",
+      "timestamp": "2026-01-09T01:18:24.774990"
+    },
+    {
+      "role": "assistant",
+      "content": "(excited) Ah, que delícia! (proud) Eu também sou um grande fã de feijoada, e quando estou comendo feijoada enquanto assisto ao Brasil jogar, sinto que estou no paraíso! (laughing) Minha família sempre faz uma grande festa em casa quando tem jogo do Brasil, e a feijoada é sempre o prato principal!",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_011825_56.wav",
+      "duration": 16.671958333333333,
+      "generation_time": 44.05752873420715,
+      "llm_time": 0.6958613395690918,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T01:19:09.535162"
+    },
+    {
+      "role": "user",
+      "content": "Tinha rivalidade dentro do campo, mas depois disso a galera dos dois times se juntava, tomava cerveja. Então eu ficava brincando com os filhos dos outros jogadores e a gente ia fazendo amizade, né?",
+      "timestamp": "2026-01-09T10:54:17.710709"
+    },
+    {
+      "role": "assistant",
+      "content": "(sorrindo) Ah, sim, é verdade! (proud) Eu sempre disse que o futebol é uma grande família, e mesmo com as rivalidades, a gente sempre encontrava um jeito de se divertir juntos. (grateful) E esses momentos com os filhos dos outros jogadores, brincando e criando laços, são realmente especiais.",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_105418_57.wav",
+      "duration": 17.136333333333333,
+      "generation_time": 51.06034517288208,
+      "llm_time": 0.6983523368835449,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T10:55:09.475409"
+    },
+    {
+      "role": "user",
+      "content": "tell me a short story  in spanish ",
+      "timestamp": "2026-01-09T11:51:41.199737"
+    },
+    {
+      "role": "user",
+      "content": "(whispering)  hola mano how are you ",
+      "timestamp": "2026-01-09T12:10:06.932797"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 22.2s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_121006_58.wav",
+      "duration": 1.7182916666666668,
+      "generation_time": 22.189683437347412,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T12:10:29.128482"
+    },
+    {
+      "role": "user",
+      "content": "(whispering) hola , how are you ? ",
+      "timestamp": "2026-01-09T12:10:57.406417"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 20.6s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_121057_59.wav",
+      "duration": 1.3932083333333334,
+      "generation_time": 20.604545831680298,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T12:11:18.016024"
+    },
+    {
+      "role": "user",
+      "content": "fratello mio , tell me , what is your favourite italian dish ? ",
+      "timestamp": "2026-01-09T12:41:56.542198"
+    },
+    {
+      "role": "assistant",
+      "content": "(riso) Ah, fratello mio! (sorridendo) Io adoro la pasta alla carbonara, (entusiasta) è il mio piatto preferito quando sono in Italia! (con affetto) Mia madre mi diceva sempre che la carbonara è un piatto che ti fa sentire a casa, (sorrindo) e ogni volta che la mangio, mi sento come se fossi a casa, con la famiglia.",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_124157_60.wav",
+      "duration": 19.411916666666666,
+      "generation_time": 44.51826620101929,
+      "llm_time": 0.7586596012115479,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T12:42:41.826121"
+    },
+    {
+      "role": "user",
+      "content": "in brazili , tell me a memorable match you had as a kid , the moment you realized you had a gift  ",
+      "timestamp": "2026-01-09T12:45:35.369470"
+    },
+    {
+      "role": "assistant",
+      "content": "(sorrindo) Ah, que jogo inesquecível! (emocionado) Eu tinha uns 10 anos e jogava pelo Santos, (proud) marcando 5 gols em um jogo contra o Corinthians. (rir) Meu pai, que é meu ídolo, estava na arquibancada, (feliz) e quando eu fiz o quinto gol, ele começou a gritar \"Esse é o meu filho!\" (sorrindo) Foi nesse momento que eu percebi que o futebol era o meu destino.",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_124536_61.wav",
+      "duration": 20.944416666666665,
+      "generation_time": 45.69715476036072,
+      "llm_time": 0.8007721900939941,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T12:46:21.874397"
+    },
+    {
+      "role": "user",
+      "content": "in brazilian ,  tell me a memorable match you had as a kid , the moment you realized you had a gift",
+      "timestamp": "2026-01-09T12:48:15.851078"
+    },
+    {
+      "role": "assistant",
+      "content": "(alegre) Eu lembro de um jogo que eu joguei pelo Santos quando era moleque, (emocionado) eu tinha uns 10 anos e marcamos 5 gols contra o Corinthians! (rir) Meu pai tava na arquibancada, (orgulhoso) e quando eu fiz o quinto gol, ele começou a gritar \"Esse é o meu filho, ele é um craque!\" (sorrindo) Naquele momento, eu senti que eu tinha um dom especial, que o futebol era pra mim!",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_124816_62.wav",
+      "duration": 22.662708333333335,
+      "generation_time": 50.68231964111328,
+      "llm_time": 0.7489686012268066,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T12:49:07.289368"
+    },
+    {
+      "role": "user",
+      "content": "in brazilian , tell me a memorable match you had as a kid , the moment you realized you had a gift",
+      "timestamp": "2026-01-09T12:49:31.548284"
+    },
+    {
+      "role": "assistant",
+      "content": "(excited) Ah, que jogo, irmão! (proud) Eu tinha 10 anos e jogava pelo Santos, (excited) marcando 5 gols em um jogo contra o Corinthians! (sorrindo) Meu pai, que é meu ídolo, estava na arquibancada e ficou louco quando eu fiz o quinto gol! (proud) Foi naquele momento que eu percebi que eu tinha um dom especial para o futebol!",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_124932_63.wav",
+      "duration": 15.371625,
+      "generation_time": 38.44022178649902,
+      "llm_time": 0.8219015598297119,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T12:50:10.817421"
+    },
+    {
+      "role": "user",
+      "content": "tell me a story from your footsal days ",
+      "timestamp": "2026-01-09T12:50:53.889564"
+    },
+    {
+      "role": "assistant",
+      "content": "(laughing) Ah, os dias de futsal! (excited) Eu me lembro de um jogo que jogamos contra o time do Pelé, (proud) eu estava com 12 anos e marquei 4 gols! (smiling) O Pelé em pessoa veio me abraçar e disse \"Você é um jogador excepcional, vai longe!\" (grateful) Foi um momento incrível, que me deu muita motivação para continuar jogando!",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_125054_64.wav",
+      "duration": 16.6255,
+      "generation_time": 40.10801815986633,
+      "llm_time": 0.7662672996520996,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T12:51:34.770851"
+    },
+    {
+      "role": "user",
+      "content": "(laughing) Ah, os dias de futsal! (excited) Eu me lembro de um jogo que jogamos contra o time do Pelé, (proud) eu estava com 12 anos e marquei 4 gols! (smiling) O Pelé em pessoa veio me abraçar e disse \"Você é um jogador excepcional, vai longe!\" (grateful) Foi um momento incrível, que me deu muita motivação para continuar jogando!",
+      "timestamp": "2026-01-09T12:57:56.827307"
+    },
+    {
+      "role": "assistant",
+      "content": "(chuckling) (amused) É, aquele jogo foi inesquecível! (proud) Eu ainda guardo a camisa que o Pelé me deu após o jogo, (smiling) com uma dedicatória que diz \"Para o novo rei do futebol, Neymar\". (grateful) É um momento que eu sempre vou lembrar, e que me motivou a trabalhar ainda mais para alcançar meus sonhos!",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_125757_65.wav",
+      "duration": 19.272583333333333,
+      "generation_time": 43.80951499938965,
+      "llm_time": 0.7704782485961914,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T12:58:41.412803"
+    },
+    {
+      "role": "user",
+      "content": "(chuckling) (amused) É, aquele jogo foi inesquecível! (proud) Eu ainda guardo a camisa que o Pelé me deu após o jogo, (smiling) com uma dedicatória que diz \"Para o novo rei do futebol, Neymar\". (grateful) É um momento que eu sempre vou lembrar, e que me motivou a trabalhar ainda mais para alcançar meus sonhos!",
+      "timestamp": "2026-01-09T13:05:23.102943"
+    },
+    {
+      "role": "assistant",
+      "content": "(laughing) (excited) E depois desse jogo, eu nunca mais parei de sonhar grande! (proud) Fui para o Santos, depois para o Barcelona, e agora estou no PSG, (smiling) vivendo meus sonhos e inspirando outras crianças a fazerem o mesmo! (grateful) O futebol me deu tudo, e eu sou eternamente grato por isso!",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_130523_66.wav",
+      "duration": 15.139416666666667,
+      "generation_time": 40.300084829330444,
+      "llm_time": 0.8013026714324951,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T13:06:04.210905"
+    },
+    {
+      "role": "user",
+      "content": "(laughing)  E depois desse jogo, eu nunca mais parei de sonhar grande! (proud) Fui para o Santos, depois para o Barcelona, e agora estou no PSG, (smiling) vivendo meus sonhos e inspirando outras crianças a fazerem o mesmo! (grateful) O futebol me deu tudo, e eu sou eternamente grato por isso!",
+      "timestamp": "2026-01-09T13:08:11.937984"
+    },
+    {
+      "role": "assistant",
+      "content": "(sighing) (satisfied) É uma sensação incrível saber que eu consegui realizar meus sonhos, (proud) e que posso inspirar outras pessoas a fazerem o mesmo. (smiling) E agora, como jogador do Al-Hilal, (excited) estou em uma nova jornada, conquistando novos desafios e escrevendo uma nova história! (grateful) O futebol é minha vida, e eu sou grato por tudo que ele me proporcionou!",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_130812_67.wav",
+      "duration": 17.832958333333334,
+      "generation_time": 43.15318298339844,
+      "llm_time": 0.8432884216308594,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T13:08:55.940194"
+    },
+    {
+      "role": "user",
+      "content": "(sighing) (satisfied) É uma sensação incrível saber que eu consegui realizar meus sonhos, (proud) e que posso inspirar outras pessoas a fazerem o mesmo. (smiling) E agora, como jogador do Al-Hilal, (excited) estou em uma nova jornada, conquistando novos desafios e escrevendo uma nova história! (grateful) O futebol é minha vida, e eu sou grato por tudo que ele me proporcionou!",
+      "timestamp": "2026-01-09T13:11:10.335283"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 45.6s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_131110_68.wav",
+      "duration": 19.737,
+      "generation_time": 45.57124352455139,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T13:11:55.912525"
+    },
+    {
+      "role": "user",
+      "content": "(sighing) (satisfied) É uma sensação incrível saber que eu consegui realizar meus sonhos, (proud) e que posso inspirar outras pessoas a fazerem o mesmo. (smiling) E agora, como jogador do Al-Hilal, (excited) estou em uma nova jornada, conquistando novos desafios e escrevendo uma nova história! (grateful) O futebol é minha vida, e eu sou grato por tudo que ele me proporcionou!",
+      "timestamp": "2026-01-09T13:15:59.665357"
+    },
+    {
+      "role": "user",
+      "content": "(sighing) (satisfied) É uma sensação incrível saber que eu consegui realizar meus sonhos, (proud) e que posso inspirar outras pessoas a fazerem o mesmo. (smiling) E agora, como jogador do Al-Hilal, (excited) estou em uma nova jornada, conquistando novos desafios e escrevendo uma nova história! (grateful) O futebol é minha vida, e eu sou grato por tudo que ele me proporcionou!",
+      "timestamp": "2026-01-09T13:18:21.060078"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 44.6s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_131821_69.mp3",
+      "duration": 19.737,
+      "generation_time": 44.599942445755005,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T13:19:05.670019"
+    },
+    {
+      "role": "user",
+      "content": "what about the day you received the offer from barcelona , the official offer , do you recall that day , can you please talk about it in detail ",
+      "timestamp": "2026-01-09T13:20:30.047618"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 28.3s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_132030_70.mp3",
+      "duration": 8.034125,
+      "generation_time": 28.321099996566772,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T13:20:58.376716"
+    },
+    {
+      "role": "user",
+      "content": "\nwhat about the day you received the offer from barcelona , the official offer , do you recall that day , can you please talk about it in detail",
+      "timestamp": "2026-01-09T13:21:21.638232"
+    },
+    {
+      "role": "assistant",
+      "content": "(excited) Ah, que dia! (proud) Eu me lembro como se fosse ontem, (smiling) recebi a oferta oficial do Barcelona e foi um momento incrível! (grateful) Eu estava no Santos, e meu pai, que é meu agente, me ligou e disse que o Barcelona havia feito uma oferta oficial por mim. (amused) Eu não podia acreditar, (laughing) eu era apenas um jovem de 21 anos e o Barcelona, um dos maiores clubes do mundo, queria me contratar! (proud) Foi um momento de muita emoção, (smiling) eu me lembro de ter chorado de alegria, (grateful) era um sonho que estava se tornando realidade!",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_132122_71.mp3",
+      "duration": 28.79275,
+      "generation_time": 57.03860521316528,
+      "llm_time": 1.1235909461975098,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T13:22:19.810744"
+    },
+    {
+      "role": "user",
+      "content": "(soft tone) Ah, que dia! (proud) Eu me lembro como se fosse ontem, (smiling) recebi a oferta oficial do Barcelona e foi um momento incrível! (grateful) Eu estava no Santos, e meu pai, que é meu agente, me ligou e disse que o Barcelona havia feito uma oferta oficial por mim. (amused) Eu não podia acreditar, (laughing) eu era apenas um jovem de 21 anos e o Barcelona, um dos maiores clubes do mundo, queria me contratar! (proud) Foi um momento de muita emoção, (smiling) eu me lembro de ter chorado de alegria, (grateful) era um sonho que estava se tornando realidade!",
+      "timestamp": "2026-01-09T13:22:56.138922"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 60.6s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_132256_72.mp3",
+      "duration": 30.418166666666668,
+      "generation_time": 60.57198762893677,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T13:23:56.719958"
+    },
+    {
+      "role": "user",
+      "content": "what about the day you got injured , and didnt play for brazil in the world cup of 2014 ",
+      "timestamp": "2026-01-09T13:25:52.600855"
+    },
+    {
+      "role": "user",
+      "content": " (excited) Ah, que dia! (proud) Eu me lembro como se fosse ontem, (smiling) recebi a oferta oficial do Barcelona e foi um momento incrível! (grateful) Eu estava no Santos, e meu pai, que é meu agente, me ligou e disse que o Barcelona havia feito uma oferta oficial por mim. (amused) Eu não podia acreditar, (laughing) eu era apenas um jovem de 21 anos e o Barcelona, um dos maiores clubes do mundo, queria me contratar! (proud) Foi um momento de muita emoção, (smiling) eu me lembro de ter chorado de alegria, (grateful) era um sonho que estava se tornando realidade!",
+      "timestamp": "2026-01-09T13:26:34.128478"
+    },
+    {
+      "role": "user",
+      "content": "what about the day you got injured , and didnt play for brazil in the world cup of 2014",
+      "timestamp": "2026-01-09T13:26:46.301404"
+    },
+    {
+      "role": "assistant",
+      "content": "(moved) (serious) Ah, que dia... (sighing) Eu me lembro da dor, (proud) da frustração, (grateful) da sensação de perda... (smiling) Eu estava em grande forma, (excited) jogando pelo Brasil na Copa do Mundo de 2014, (proud) e então aconteceu o pior, eu sofrí uma lesão grave na coluna vertebral. (grateful) Foi um momento muito difícil, (smiling) mas eu sempre tive a sorte de ter uma família e amigos incríveis ao meu lado, (proud) e eu sabia que ia me recuperar e voltar mais forte do que nunca! (determined) Eu me lembro do chute de Zúñiga, (serious) foi um momento de muita dor, (moved) mas eu nunca desisti!",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_132647_73.mp3",
+      "duration": 30.74325,
+      "generation_time": 85.67418551445007,
+      "llm_time": 0.8147532939910889,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T13:28:12.799344"
+    },
+    {
+      "role": "user",
+      "content": "(moved) (serious) Ah, que dia... (soft tone) Eu me lembro da dor,   da frustração, (grateful) da sensação de perda... (smiling) Eu estava em grande forma, (excited) jogando pelo Brasil na Copa do Mundo de  14, (proud) e então aconteceu o pior, eu sofrí uma lesão grave na coluna vertebral. eeh (sad) Foi um momento muito difícil,  um mas eu sempre tive a sorte  (moved) , de ter uma família  e amigos incríveis ao meu lado, (soft tone) e eu sabia que ia me recuperar e voltar mais forte do que nunca! (determined) Eu me lembro do chute de Zúñiga, (serious) foi um momento de muita dor, (moved) mas eu nunca desisti!",
+      "timestamp": "2026-01-09T13:30:35.040555"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 63.9s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_133035_74.mp3",
+      "duration": 33.99404166666667,
+      "generation_time": 63.937649726867676,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T13:31:38.987203"
+    },
+    {
+      "role": "user",
+      "content": " (serious) Ah, que dia... (soft tone) Eu me lembro da dor, da frustração,  (sobbing) da sensação de perda... (smiling) Eu estava em grande forma, (excited) jogando pelo Brasil na Copa do Mundo de 14, (proud) e então aconteceu o pior, eu sofrí uma lesão grave na coluna vertebral. eeh (sad)  Foi um momento muito difícil, um mas eu sempre tive a sorte    ,  (sobbing)  de ter uma família e amigos incríveis ao meu lado, (soft tone) e eu sabia que ia me recuperar e voltar mais forte do que nunca ! Eu me lembro do chute de Zúñiga,  (depressed)  foi um momento de muita dor, (moved) mas eu nunca desisti!",
+      "timestamp": "2026-01-09T13:34:36.300829"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 69.9s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_133436_75.mp3",
+      "duration": 32.83304166666667,
+      "generation_time": 69.86049389839172,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T13:35:46.170324"
+    },
+    {
+      "role": "user",
+      "content": "eee eu me lembro da dor ",
+      "timestamp": "2026-01-09T13:47:00.695931"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 20.2s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_134700_76.mp3",
+      "duration": 1.76475,
+      "generation_time": 20.242714643478394,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T13:47:20.947153"
+    },
+    {
+      "role": "user",
+      "content": "what about the day you got injured , and didnt play for brazil in the world cup of 2014",
+      "timestamp": "2026-01-09T13:52:59.556786"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 24.4s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_135259_77.mp3",
+      "duration": 5.201291666666667,
+      "generation_time": 24.416133880615234,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T13:53:23.980920"
+    },
+    {
+      "role": "user",
+      "content": "what about the day you got injured , and didnt play for brazil in the world cup of 2014",
+      "timestamp": "2026-01-09T13:53:39.324823"
+    },
+    {
+      "role": "assistant",
+      "content": "(sighing) (serious) Foi um dia muito triste, (proud) eu me lembro de ter chorado de dor e de frustração, (grateful) pois eu estava tão perto de ajudar o Brasil a conquistar o título. (smiling) Eu estava em grande forma, (excited) e então aconteceu o acidente, (proud) o chute de Zúñiga me tirou da Copa do Mundo, (serious) e foi muito difícil aceitar. (grateful) Mas, (smiling) eu sempre tive a sorte de ter pessoas incríveis ao meu lado, (proud) e eu sabia que ia me recuperar e voltar a jogar pelo Brasil!",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_135340_78.mp3",
+      "duration": 24.93825,
+      "generation_time": 51.498472929000854,
+      "llm_time": 0.8595914840698242,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T13:54:31.691887"
+    },
+    {
+      "role": "user",
+      "content": "what about the day you got injured , and didnt play for brazil in the world cup of 2014",
+      "timestamp": "2026-01-09T13:55:30.478400"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 26.3s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_135530_79.mp3",
+      "duration": 5.99075,
+      "generation_time": 26.287890434265137,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T13:55:56.775287"
+    },
+    {
+      "role": "user",
+      "content": "(sighing) (serious) Foi um dia muito triste, (proud) eu me lembro de ter chorado de dor e de frustração, (grateful) pois eu estava tão perto de ajudar o Brasil a conquistar o título. (smiling) Eu estava em grande forma, (excited) e então aconteceu o acidente, (proud) o chute de Zúñiga me tirou da Copa do Mundo, (serious) e foi muito difícil aceitar. (grateful) Mas, (smiling) eu sempre tive a sorte de ter pessoas incríveis ao meu lado, (proud) e eu sabia que ia me recuperar e voltar a jogar pelo Brasil!",
+      "timestamp": "2026-01-09T13:57:06.927934"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 53.0s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_135706_80.mp3",
+      "duration": 25.588416666666667,
+      "generation_time": 52.96711444854736,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T13:57:59.905220"
+    },
+    {
+      "role": "user",
+      "content": "(sighing)Foi um dia muito triste,  eu me lembro de ter chorado de dor e de frustração,  pois eu estava tão perto de ajudar o Brasil a conquistar o título.  Eu estava em grande forma,  e então aconteceu o acidente,  o chute de Zúñiga me tirou da Copa do Mundo, (serious) e foi muito difícil aceitar. Mas,  eu sempre tive a sorte de ter pessoas incríveis ao meu lado,  e eu sabia que ia me recuperar e voltar a jogar pelo Brasil!",
+      "timestamp": "2026-01-09T13:59:46.923943"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 58.5s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_135946_81.mp3",
+      "duration": 30.278833333333335,
+      "generation_time": 58.512932538986206,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T14:00:45.444874"
+    },
+    {
+      "role": "user",
+      "content": "(sighing) Foi um dia muito triste, eu me lembro de ter chorado de dor e de frustração, pois eu estava tão perto de ajudar o Brasil a conquistar o título. (soft tone) Eu estava em grande forma, e então aconteceu o acidente, o chute de Zúñiga me tirou da Copa do Mundo, (serious) e foi muito difícil aceitar. Mas, eu sempre tive a sorte de ter pessoas incríveis ao meu lado, e eu sabia que ia me recuperar e voltar a jogar pelo Brasil!",
+      "timestamp": "2026-01-09T14:01:16.216341"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 47.7s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_140116_82.mp3",
+      "duration": 22.476916666666668,
+      "generation_time": 47.69749999046326,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T14:02:03.924840"
+    },
+    {
+      "role": "user",
+      "content": "(sighing)Foi um dia muito triste, eu me lembro de ter chorado de dor e de frustração, pois eu estava tão perto de ajudar o Brasil a conquistar o título. Eu estava em grande forma, e então aconteceu o acidente, o chute de Zúñiga me tirou da Copa do Mundo, (serious) e foi muito difícil aceitar. Mas, eu sempre tive a sorte de ter pessoas incríveis ao meu lado, e eu sabia que ia me recuperar e voltar a jogar pelo Brasil!",
+      "timestamp": "2026-01-09T14:03:11.687152"
+    },
+    {
+      "role": "user",
+      "content": "(sighing)Foi um dia muito triste, eu me lembro de ter chorado de dor e de frustração, pois eu estava tão perto de ajudar o Brasil a conquistar o título. Eu estava em grande forma, e então aconteceu o acidente, o chute de Zúñiga me tirou da Copa do Mundo, (serious) e foi muito difícil aceitar. Mas, eu sempre tive a sorte de ter pessoas incríveis ao meu lado, e eu sabia que ia me recuperar e voltar a jogar pelo Brasil!",
+      "timestamp": "2026-01-09T14:04:38.330894"
+    },
+    {
+      "role": "assistant",
+      "content": "(sighing) (serious) Sim, foi um dia que eu nunca vou esquecer, (proud) a lesão me tirou da Copa do Mundo, (grateful) mas não me tirou a vontade de jogar e de lutar. (smiling) Eu me lembro de ter pensado, (excited) \"Eu vou voltar, eu vou jogar novamente, (proud) e eu vou fazer tudo o que for necessário para ajudar o Brasil a conquistar títulos\". (grateful) E, (smiling) com o apoio da minha família e dos meus amigos, (proud) eu consegui superar aquela lesão e voltar a ser um dos melhores jogadores do mundo!",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_140439_83.mp3",
+      "duration": 26.052791666666668,
+      "generation_time": 53.04366874694824,
+      "llm_time": 0.8629026412963867,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T14:05:32.248253"
+    },
+    {
+      "role": "user",
+      "content": " (serious) Sim, foi um dia que eu nunca vou esquecer, (proud) a lesão me tirou da Copa do Mundo, (grateful) mas não me tirou a vontade de jogar e de lutar. (smiling) Eu me lembro de ter pensado, (excited) \"Eu vou voltar, eu vou jogar novamente, (proud) e eu vou fazer tudo o que for necessário para ajudar o Brasil a conquistar títulos\". (grateful) E, (smiling) com o apoio da minha família e dos meus amigos, (proud) eu consegui superar aquela lesão e voltar a ser um dos melhores jogadores do mundo!",
+      "timestamp": "2026-01-09T14:07:24.527195"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 50.4s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_140724_84.mp3",
+      "duration": 24.380958333333332,
+      "generation_time": 50.38958954811096,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T14:08:14.926298"
+    },
+    {
+      "role": "user",
+      "content": " (serious) Sim, foi um dia que eu nunca vou esquecer, (proud) a lesão me tirou da Copa do Mundo, (grateful) mas não me tirou a vontade de jogar e de lutar. (smiling) Eu me lembro de ter pensado, (excited) \"Eu vou voltar, eu vou jogar novamente, (proud) e eu vou fazer tudo o que for necessário para ajudar o Brasil a conquistar títulos\". (grateful) E, (smiling) com o apoio da minha família e dos meus amigos, (proud) eu consegui superar aquela lesão e voltar a ser um dos melhores jogadores do mundo!",
+      "timestamp": "2026-01-09T14:09:03.952066"
+    },
+    {
+      "role": "assistant",
+      "content": "(grateful) É, (smiling) foi um momento muito difícil, mas (proud) eu sempre soube que ia superar. (serious) A lesão foi um grande desafio, (excited) mas eu não desisti, eu continuei trabalhando, (proud) e eu consegui voltar a jogar no mais alto nível. (smiling) E, (grateful) agora, eu posso dizer que estou em uma das melhores fases da minha carreira, (proud) jogando pelo Al-Hilal, (excited) e representando o Brasil nas competições internacionais!",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_140904_85.mp3",
+      "duration": 22.012541666666667,
+      "generation_time": 47.14364314079285,
+      "llm_time": 0.8393146991729736,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T14:09:51.945034"
+    },
+    {
+      "role": "user",
+      "content": "(grateful) É, (smiling) foi um momento muito difícil, mas (proud) eu sempre soube que ia superar. (serious) A lesão foi um grande desafio, (excited) mas eu não desisti, eu continuei trabalhando, (proud) e eu consegui voltar a jogar no mais alto nível. (smiling) E, (grateful) agora, eu posso dizer que estou em uma das melhores fases da minha carreira, (proud) jogando pelo Al-Hilal, (excited) e representando o Brasil nas competições internacionais!",
+      "timestamp": "2026-01-09T14:46:39.305955"
+    },
+    {
+      "role": "assistant",
+      "content": "(excited) Sim, (smiling) estou muito feliz com o caminho que eu estou trilhando, (proud) e eu sei que ainda tenho muito a conquistar. (grateful) Eu tenho sorte de ter uma equipe incrível ao meu lado, (smiling) e eu estou ansioso para ver o que o futuro reserva para mim e para o Brasil. (serious) Vou continuar trabalhando duro, (proud) e vou fazer tudo o que for necessário para continuar a ser um dos melhores jogadores do mundo, (excited) e para ajudar o Brasil a conquistar mais títulos!",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_144640_86.mp3",
+      "duration": 22.38404166666667,
+      "generation_time": 48.42789626121521,
+      "llm_time": 0.8153142929077148,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T14:47:28.559162"
+    },
+    {
+      "role": "user",
+      "content": "(serious) Sim, foi um dia que eu nunca vou esquecer, (proud) a lesão me tirou da Copa do Mundo, (grateful) mas não me tirou a vontade de jogar e de lutar. (smiling) Eu me lembro de ter pensado, (excited) \"Eu vou voltar, eu vou jogar novamente, (proud) e eu vou fazer tudo o que for necessário para ajudar o Brasil a conquistar títulos\". (grateful) E, (smiling) com o apoio da minha família e dos meus amigos, (proud) eu consegui superar aquela lesão e voltar a ser um dos melhores jogadores do mundo!",
+      "timestamp": "2026-01-09T14:51:20.004178"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 52.6s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_145120_87.mp3",
+      "duration": 26.377875,
+      "generation_time": 52.59629249572754,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T14:52:12.610466"
+    },
+    {
+      "role": "user",
+      "content": " Eu acho que eu descobri mesmo que eu amo muito o futebol, viu? E depois de ficar tanto tempo parado ali, sem fazer praticamente, só treinando, né? Eu treinei bastante ali.",
+      "timestamp": "2026-01-09T14:55:05.563755"
+    },
+    {
+      "role": "assistant",
+      "content": "✅ Generated in 28.5s",
+      "audio_path": "outputs\\streamlit\\neymar_chat_20260109_145505_88.mp3",
+      "duration": 8.405625,
+      "generation_time": 28.54928946495056,
+      "llm_time": 0,
+      "model": "OpenAudio S1-mini",
+      "timestamp": "2026-01-09T14:55:34.122044"
     }
   ],
-  "generation_count": 56,
-  "last_updated": "2026-01-02T22:37:31.587330"
+  "generation_count": 89,
+  "last_updated": "2026-01-09T14:55:34.122044"
 }

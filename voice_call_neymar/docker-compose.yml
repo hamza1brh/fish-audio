@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  livekit:
+    image: livekit/livekit-server:latest
+    command: --dev
+    ports:
+      - "7880:7880"   # WebSocket
+      - "7881:7881"   # HTTP API
+      - "7882:7882/udp"  # WebRTC UDP
+    environment:
+      - LIVEKIT_KEYS=devkey:secret
+    restart: unless-stopped
+
+  # Optional: Run the agent as a service
+  # Uncomment to run agent in Docker instead of locally
+  # agent:
+  #   build: .
+  #   depends_on:
+  #     - livekit
+  #   environment:
+  #     - LIVEKIT_URL=ws://livekit:7880
+  #     - LIVEKIT_API_KEY=devkey
+  #     - LIVEKIT_API_SECRET=secret
+  #     - GROQ_API_KEY=${GROQ_API_KEY}
+  #     - ELEVEN_LABS_KEY=${ELEVEN_LABS_KEY}
+  #     - ELEVEN_LABS_VOICE_ID=${ELEVEN_LABS_VOICE_ID}
+  #   command: python -m voice_call_neymar.agent dev

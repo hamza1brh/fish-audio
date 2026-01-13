@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Call Neymar</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: linear-gradient(
+          135deg,
+          #0f0f23 0%,
+          #1a1a3e 50%,
+          #0d1b2a 100%
+        );
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #e0e0e0;
+      }
+      .container {
+        text-align: center;
+        padding: 40px;
+        width: 100%;
+        max-width: 800px;
+      }
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        background: linear-gradient(90deg, #ffd700, #ffaa00);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .subtitle {
+        color: #888;
+        margin-bottom: 40px;
+        font-size: 1.1rem;
+      }
+      .main-area {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+        justify-content: center;
+      }
+      .call-section {
+        flex-shrink: 0;
+      }
+      .call-button {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        font-size: 1.2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin: 0 auto 20px;
+      }
+      .call-button.idle {
+        background: linear-gradient(145deg, #00c853, #00a844);
+        color: white;
+        box-shadow: 0 8px 32px rgba(0, 200, 83, 0.4);
+      }
+      .call-button.idle:hover {
+        transform: scale(1.05);
+        box-shadow: 0 12px 48px rgba(0, 200, 83, 0.6);
+      }
+      .call-button.connecting {
+        background: linear-gradient(145deg, #ff9800, #f57c00);
+        color: white;
+        animation: pulse 1.5s infinite;
+      }
+      .call-button.active {
+        background: linear-gradient(145deg, #f44336, #d32f2f);
+        color: white;
+        box-shadow: 0 8px 32px rgba(244, 67, 54, 0.4);
+        animation: glow 2s infinite;
+      }
+      .call-button.active:hover {
+        transform: scale(1.05);
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(1.02);
+          opacity: 0.9;
+        }
+      }
+      @keyframes glow {
+        0%,
+        100% {
+          box-shadow: 0 8px 32px rgba(244, 67, 54, 0.4);
+        }
+        50% {
+          box-shadow: 0 8px 48px rgba(244, 67, 54, 0.7);
+        }
+      }
+      .phone-icon {
+        font-size: 3rem;
+      }
+      .status-text {
+        font-size: 1rem;
+        color: #aaa;
+        min-height: 24px;
+      }
+      .visualizer {
+        display: flex;
+        gap: 4px;
+        justify-content: center;
+        align-items: flex-end;
+        height: 40px;
+        margin-bottom: 20px;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .visualizer.active {
+        opacity: 1;
+      }
+      .bar {
+        width: 6px;
+        background: linear-gradient(to top, #00c853, #69f0ae);
+        border-radius: 3px;
+        animation: wave 0.5s ease-in-out infinite;
+      }
+      .bar:nth-child(1) {
+        animation-delay: 0s;
+      }
+      .bar:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+      .bar:nth-child(3) {
+        animation-delay: 0.2s;
+      }
+      .bar:nth-child(4) {
+        animation-delay: 0.3s;
+      }
+      .bar:nth-child(5) {
+        animation-delay: 0.4s;
+      }
+      @keyframes wave {
+        0%,
+        100% {
+          height: 10px;
+        }
+        50% {
+          height: 35px;
+        }
+      }
+
+      /* Transcript Panel */
+      .transcript-panel {
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 16px;
+        overflow: hidden;
+        width: 350px;
+        transition: all 0.3s ease;
+      }
+      .transcript-panel.collapsed {
+        width: 50px;
+      }
+      .transcript-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.05);
+        cursor: pointer;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .transcript-header:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+      .transcript-title {
+        font-weight: 600;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .transcript-panel.collapsed .transcript-title span {
+        display: none;
+      }
+      .toggle-icon {
+        transition: transform 0.3s;
+        font-size: 1.2rem;
+      }
+      .transcript-panel.collapsed .toggle-icon {
+        transform: rotate(180deg);
+      }
+      .transcript-body {
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 16px;
+      }
+      .transcript-panel.collapsed .transcript-body {
+        display: none;
+      }
+      .message {
+        margin-bottom: 12px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        max-width: 90%;
+        word-wrap: break-word;
+        animation: fadeIn 0.3s ease;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .message.user {
+        background: linear-gradient(135deg, #1e88e5, #1565c0);
+        margin-left: auto;
+        text-align: right;
+        border-bottom-right-radius: 4px;
+      }
+      .message.agent {
+        background: linear-gradient(135deg, #ffd700, #ff9800);
+        color: #1a1a1a;
+        margin-right: auto;
+        text-align: left;
+        border-bottom-left-radius: 4px;
+      }
+      .message-label {
+        font-size: 0.7rem;
+        opacity: 0.7;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .message-text {
+        font-size: 0.9rem;
+        line-height: 1.4;
+      }
+      .transcript-empty {
+        text-align: center;
+        color: #666;
+        font-style: italic;
+        padding: 20px;
+      }
+
+      .log {
+        max-width: 500px;
+        margin: 20px auto 0;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 12px;
+        padding: 15px;
+        font-family: "Consolas", monospace;
+        font-size: 0.75rem;
+        text-align: left;
+        max-height: 120px;
+        overflow-y: auto;
+        color: #69f0ae;
+      }
+      .log-entry {
+        margin: 3px 0;
+      }
+      .log-entry.error {
+        color: #ff5252;
+      }
+      .log-entry.info {
+        color: #69f0ae;
+      }
+      #audioContainer {
+        display: none;
+      }
+
+      /* Response Delay Slider */
+      .slider-container {
+        margin: 20px auto;
+        max-width: 250px;
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 12px;
+      }
+      .slider-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        font-size: 0.85rem;
+        color: #aaa;
+      }
+      .slider-value {
+        color: #69f0ae;
+        font-weight: 600;
+      }
+      .slider-input {
+        width: 100%;
+        height: 6px;
+        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.1);
+        outline: none;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      .slider-input::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: linear-gradient(145deg, #69f0ae, #00c853);
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 200, 83, 0.4);
+      }
+      .slider-input::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: linear-gradient(145deg, #69f0ae, #00c853);
+        cursor: pointer;
+        border: none;
+        box-shadow: 0 2px 8px rgba(0, 200, 83, 0.4);
+      }
+      .slider-hints {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.7rem;
+        color: #666;
+        margin-top: 6px;
+      }
+
+      @media (max-width: 700px) {
+        .main-area {
+          flex-direction: column;
+          align-items: center;
+        }
+        .transcript-panel {
+          width: 100%;
+          max-width: 400px;
+        }
+        .transcript-panel.collapsed {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Call Neymar</h1>
+      <p class="subtitle">Voice chat with the football legend</p>
+
+      <div class="main-area">
+        <div class="call-section">
+          <div class="visualizer" id="visualizer">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+          </div>
+
+          <button class="call-button idle" id="callBtn" onclick="toggleCall()">
+            <span class="phone-icon" id="phoneIcon">&#128222;</span>
+            <span id="btnText">Start Call</span>
+          </button>
+
+          <p class="status-text" id="status">Click to start a voice call</p>
+
+          <div class="slider-container">
+            <div class="slider-label">
+              <span>Response Delay</span>
+              <span class="slider-value" id="delayValue">0.8s</span>
+            </div>
+            <input
+              type="range"
+              class="slider-input"
+              id="delaySlider"
+              min="0.3"
+              max="2.0"
+              step="0.1"
+              value="0.8"
+              oninput="updateDelayValue(this.value)"
+            />
+            <div class="slider-hints">
+              <span>Eager</span>
+              <span>Patient</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="transcript-panel" id="transcriptPanel">
+          <div class="transcript-header" onclick="toggleTranscript()">
+            <div class="transcript-title">
+              <span class="toggle-icon">&#9664;</span>
+              <span>Transcript</span>
+            </div>
+          </div>
+          <div class="transcript-body" id="transcriptBody">
+            <div class="transcript-empty" id="transcriptEmpty">
+              Start a call to see the conversation...
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="log" id="log"></div>
+
+      <div id="audioContainer"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.6.0/dist/livekit-client.umd.min.js"></script>
+    <script>
+      let room = null;
+      let isConnected = false;
+      let isConnecting = false;
+      let transcriptCollapsed = false;
+      let responseDelay = 0.8;
+
+      const logEl = document.getElementById("log");
+      const delaySlider = document.getElementById("delaySlider");
+      const delayValueEl = document.getElementById("delayValue");
+
+      function updateDelayValue(val) {
+        responseDelay = parseFloat(val);
+        delayValueEl.textContent = val + "s";
+      }
+      const statusEl = document.getElementById("status");
+      const btnEl = document.getElementById("callBtn");
+      const btnTextEl = document.getElementById("btnText");
+      const phoneIconEl = document.getElementById("phoneIcon");
+      const visualizerEl = document.getElementById("visualizer");
+      const audioContainer = document.getElementById("audioContainer");
+      const transcriptPanel = document.getElementById("transcriptPanel");
+      const transcriptBody = document.getElementById("transcriptBody");
+      const transcriptEmpty = document.getElementById("transcriptEmpty");
+
+      function log(msg, type = "info") {
+        const entry = document.createElement("div");
+        entry.className = `log-entry ${type}`;
+        entry.textContent = `> ${msg}`;
+        logEl.appendChild(entry);
+        logEl.scrollTop = logEl.scrollHeight;
+        console.log(msg);
+      }
+
+      function toggleTranscript() {
+        transcriptCollapsed = !transcriptCollapsed;
+        transcriptPanel.classList.toggle("collapsed", transcriptCollapsed);
+      }
+
+      function addTranscriptMessage(text, role) {
+        // Hide empty state
+        transcriptEmpty.style.display = "none";
+
+        const msg = document.createElement("div");
+        msg.className = `message ${role}`;
+
+        const label = document.createElement("div");
+        label.className = "message-label";
+        label.textContent = role === "user" ? "You" : "Neymar";
+
+        const content = document.createElement("div");
+        content.className = "message-text";
+        content.textContent = text;
+
+        msg.appendChild(label);
+        msg.appendChild(content);
+        transcriptBody.appendChild(msg);
+
+        // Auto-scroll
+        transcriptBody.scrollTop = transcriptBody.scrollHeight;
+      }
+
+      function clearTranscript() {
+        transcriptBody.innerHTML = "";
+        const emptyEl = document.createElement("div");
+        emptyEl.className = "transcript-empty";
+        emptyEl.id = "transcriptEmpty";
+        emptyEl.textContent = "Start a call to see the conversation...";
+        transcriptBody.appendChild(emptyEl);
+      }
+
+      function updateUI(state) {
+        btnEl.className = `call-button ${state}`;
+        visualizerEl.className = `visualizer ${
+          state === "active" ? "active" : ""
+        }`;
+
+        if (state === "idle") {
+          phoneIconEl.innerHTML = "&#128222;";
+          btnTextEl.textContent = "Start Call";
+          statusEl.textContent = "Click to start a voice call";
+        } else if (state === "connecting") {
+          phoneIconEl.innerHTML = "&#8987;";
+          btnTextEl.textContent = "Connecting...";
+          statusEl.textContent = "Establishing connection...";
+        } else if (state === "active") {
+          phoneIconEl.innerHTML = "&#128225;";
+          btnTextEl.textContent = "End Call";
+          statusEl.textContent = "Connected - speak now!";
+        }
+      }
+
+      async function toggleCall() {
+        if (isConnecting) return;
+
+        if (isConnected) {
+          await disconnect();
+        } else {
+          await connect();
+        }
+      }
+
+      async function connect() {
+        isConnecting = true;
+        updateUI("connecting");
+        clearTranscript();
+
+        try {
+          log("Getting access token...");
+          // Nuclear solution: fixed room and identity
+          const roomName = "neymar-room";
+          const identity = "user";
+          const delay = responseDelay;
+          const resp = await fetch(
+            `/token?room=${roomName}&identity=${identity}&delay=${delay}`
+          );
+          const data = await resp.json();
+          log(`Token for room: ${data.room}`);
+
+          room = new LivekitClient.Room({
+            adaptiveStream: true,
+            dynacast: true,
+          });
+
+          room.on(LivekitClient.RoomEvent.Connected, () => {
+            log("Connected to room");
+            isConnected = true;
+            isConnecting = false;
+            updateUI("active");
+          });
+
+          room.on(LivekitClient.RoomEvent.Disconnected, () => {
+            log("Disconnected");
+            isConnected = false;
+            updateUI("idle");
+            audioContainer.innerHTML = "";
+          });
+
+          room.on(LivekitClient.RoomEvent.ParticipantConnected, (p) => {
+            log(`${p.identity} joined`);
+          });
+
+          room.on(LivekitClient.RoomEvent.ParticipantDisconnected, (p) => {
+            log(`${p.identity} left`);
+          });
+
+          room.on(
+            LivekitClient.RoomEvent.TrackSubscribed,
+            (track, pub, participant) => {
+              if (track.kind === "audio") {
+                const isLocalParticipant =
+                  participant.identity === room.localParticipant.identity;
+                if (!isLocalParticipant) {
+                  log(`Playing audio from: ${participant.identity}`);
+                  const el = track.attach();
+                  el.id = `audio-${participant.identity}`;
+                  audioContainer.appendChild(el);
+                }
+              }
+            }
+          );
+
+          room.on(
+            LivekitClient.RoomEvent.TrackUnsubscribed,
+            (track, pub, participant) => {
+              track.detach().forEach((el) => el.remove());
+            }
+          );
+
+          // Listen for transcription events
+          room.on(
+            LivekitClient.RoomEvent.TranscriptionReceived,
+            (segments, participant) => {
+              for (const segment of segments) {
+                if (segment.final && segment.text && segment.text.trim()) {
+                  const role = participant?.identity?.includes("agent")
+                    ? "agent"
+                    : "user";
+                  addTranscriptMessage(segment.text.trim(), role);
+                  log(`[${role}] ${segment.text.trim()}`);
+                }
+              }
+            }
+          );
+
+          // Listen for data messages (agent might send transcript data)
+          room.on(LivekitClient.RoomEvent.DataReceived, (data, participant) => {
+            try {
+              const msg = JSON.parse(new TextDecoder().decode(data));
+              if (msg.type === "transcript" || msg.type === "transcription") {
+                const role =
+                  msg.role ||
+                  (participant?.identity?.includes("agent") ? "agent" : "user");
+                if (msg.text && msg.text.trim()) {
+                  addTranscriptMessage(msg.text.trim(), role);
+                }
+              }
+            } catch (e) {
+              // Not JSON, ignore
+            }
+          });
+
+          room.on(LivekitClient.RoomEvent.ConnectionStateChanged, (state) => {
+            log(`Connection state: ${state}`);
+          });
+
+          log(`Connecting to LiveKit...`);
+          await room.connect(data.url, data.token);
+
+          log("Enabling microphone...");
+          await room.localParticipant.setMicrophoneEnabled(true, {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          });
+          log("Microphone enabled");
+        } catch (err) {
+          log(`Error: ${err.message}`, "error");
+          isConnecting = false;
+          updateUI("idle");
+        }
+      }
+
+      async function disconnect() {
+        if (room) {
+          log("Disconnecting...");
+          await room.disconnect();
+          room = null;
+        }
+        isConnected = false;
+        updateUI("idle");
+      }
+
+      log("Voice Call UI ready");
+    </script>
+  </body>
+</html>
