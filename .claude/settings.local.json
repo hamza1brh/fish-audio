@@ -3,7 +3,16 @@
     "allow": [
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "WebFetch(domain:api.github.com)"
+      "WebFetch(domain:api.github.com)",
+      "Bash(dir:*)",
+      "Bash(python:*)",
+      "Bash(tee:*)",
+      "Bash(pip uninstall:*)",
+      "Bash(pip install:*)",
+      "WebSearch",
+      "Bash(wsl --list:*)",
+      "Bash(wsl:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []
