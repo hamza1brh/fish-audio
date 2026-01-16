@@ -31,7 +31,34 @@ if hasattr(torch._inductor.config, "fx_graph_cache"):
     torch._inductor.config.fx_graph_cache = True
 
 
-from torch.nn.attention import SDPBackend, sdpa_kernel
+# PyTorch version compatibility for attention backend selection
+# torch.nn.attention was added in PyTorch 2.5+
+try:
+    from torch.nn.attention import SDPBackend, sdpa_kernel
+except ImportError:
+    # Fallback for PyTorch < 2.5 (e.g., 2.2.x on SageMaker)
+    from contextlib import contextmanager
+
+    class SDPBackend:
+        FLASH_ATTENTION = "flash"
+        EFFICIENT_ATTENTION = "efficient"
+        MATH = "math"
+
+    @contextmanager
+    def sdpa_kernel(backend):
+        """Compatibility shim for PyTorch < 2.5"""
+        if hasattr(torch.backends.cuda, "sdp_kernel"):
+            enable_flash = backend == SDPBackend.FLASH_ATTENTION
+            enable_efficient = backend == SDPBackend.EFFICIENT_ATTENTION
+            enable_math = backend == SDPBackend.MATH
+            with torch.backends.cuda.sdp_kernel(
+                enable_flash=enable_flash,
+                enable_math=enable_math,
+                enable_mem_efficient=enable_efficient,
+            ):
+                yield
+        else:
+            yield
 
 from fish_speech.models.text2semantic.llama import (
     BaseTransformer,
