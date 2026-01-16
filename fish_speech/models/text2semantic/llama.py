@@ -499,7 +499,7 @@ class BaseTransformer(nn.Module):
                 model = simple_quantizer.convert_for_runtime()
 
             weights = torch.load(
-                Path(path) / "model.pth",
+                str(Path(path) / "model.pth"),
                 map_location="cpu",
                 mmap=True,
                 weights_only=True,
