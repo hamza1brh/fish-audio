@@ -50,6 +50,7 @@ Deployment Notes:
 """
 
 import asyncio
+import base64
 import os
 import time
 from contextlib import asynccontextmanager
@@ -78,7 +79,9 @@ class TTSRequest(BaseModel):
 
     Attributes:
         text: Text to synthesize (required)
-        reference_id: Pre-registered reference voice ID
+        reference_audio: Base64-encoded audio for zero-shot voice cloning
+        reference_text: Text spoken in reference audio (required with reference_audio)
+        reference_id: Pre-registered reference voice ID (alternative to reference_audio)
         max_new_tokens: Maximum tokens to generate (default: 2048)
         temperature: Sampling temperature 0.0-2.0 (default: 0.7)
         top_p: Nucleus sampling threshold 0.0-1.0 (default: 0.8)
@@ -89,6 +92,8 @@ class TTSRequest(BaseModel):
     """
 
     text: str = Field(..., min_length=1, max_length=10000, description="Text to synthesize")
+    reference_audio: Optional[str] = Field(None, description="Base64-encoded audio for zero-shot cloning")
+    reference_text: Optional[str] = Field(None, description="Text spoken in reference audio")
     reference_id: Optional[str] = Field(None, description="Pre-registered reference ID")
     max_new_tokens: int = Field(2048, ge=1, le=4096, description="Max tokens")
     temperature: float = Field(0.7, ge=0.0, le=2.0, description="Sampling temperature")
@@ -102,6 +107,7 @@ class TTSRequest(BaseModel):
         json_schema_extra = {
             "example": {
                 "text": "Hello, this is a test of the text to speech system.",
+                "reference_text": "This is the text spoken in the reference audio.",
                 "temperature": 0.7,
                 "top_p": 0.8,
             }
@@ -313,7 +319,9 @@ def register_routes(app: FastAPI):
 
         Request Body:
             text: Text to synthesize
-            reference_id: Optional reference voice ID
+            reference_audio: Base64-encoded audio for zero-shot cloning (optional)
+            reference_text: Text spoken in reference audio (required with reference_audio)
+            reference_id: Pre-registered reference ID (alternative to reference_audio)
             temperature: Sampling temperature
             top_p: Nucleus sampling threshold
             ...
@@ -327,9 +335,29 @@ def register_routes(app: FastAPI):
         app_state.request_count += 1
 
         try:
+            # Handle reference audio for zero-shot cloning
+            reference_audio_bytes = None
+            if request.reference_audio is not None:
+                # Validate reference_text is provided
+                if request.reference_text is None:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="reference_text is required when using reference_audio"
+                    )
+                # Decode base64 audio
+                try:
+                    reference_audio_bytes = base64.b64decode(request.reference_audio)
+                except Exception as e:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Invalid base64 encoding for reference_audio: {e}"
+                    )
+
             # Generate audio
             response = app_state.engine.generate(
                 text=request.text,
+                reference_audio=reference_audio_bytes,
+                reference_text=request.reference_text,
                 reference_id=request.reference_id,
                 max_new_tokens=request.max_new_tokens,
                 temperature=request.temperature,
@@ -358,6 +386,9 @@ def register_routes(app: FastAPI):
 
         except HTTPException:
             raise
+        except ValueError as e:
+            app_state.error_count += 1
+            raise HTTPException(status_code=400, detail=str(e))
         except TimeoutError as e:
             app_state.error_count += 1
             raise HTTPException(status_code=504, detail=str(e))
@@ -375,17 +406,36 @@ def register_routes(app: FastAPI):
         Generate TTS audio with streaming.
 
         Returns audio as chunked stream for real-time playback.
+        Supports zero-shot voice cloning via reference_audio + reference_text.
         """
         if app_state.engine is None or not app_state.engine.is_running:
             raise HTTPException(status_code=503, detail="Engine not ready")
 
         app_state.request_count += 1
 
+        # Handle reference audio for zero-shot cloning
+        reference_audio_bytes = None
+        if request.reference_audio is not None:
+            if request.reference_text is None:
+                raise HTTPException(
+                    status_code=400,
+                    detail="reference_text is required when using reference_audio"
+                )
+            try:
+                reference_audio_bytes = base64.b64decode(request.reference_audio)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid base64 encoding for reference_audio: {e}"
+                )
+
         async def audio_generator():
             """Async generator for streaming audio chunks."""
             try:
                 for result in app_state.engine.generate_stream(
                     text=request.text,
+                    reference_audio=reference_audio_bytes,
+                    reference_text=request.reference_text,
                     reference_id=request.reference_id,
                     max_new_tokens=request.max_new_tokens,
                     temperature=request.temperature,

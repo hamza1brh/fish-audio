@@ -307,6 +307,7 @@ class ProductionTTSEngine:
         self,
         text: str,
         reference_audio: Optional[bytes] = None,
+        reference_text: Optional[str] = None,
         reference_id: Optional[str] = None,
         max_new_tokens: Optional[int] = None,
         temperature: Optional[float] = None,
@@ -325,8 +326,9 @@ class ProductionTTSEngine:
 
         Args:
             text: Text to synthesize
-            reference_audio: Reference audio bytes for voice cloning
-            reference_id: Pre-registered reference ID
+            reference_audio: Reference audio bytes for voice cloning (requires reference_text)
+            reference_text: Text spoken in reference audio (required for voice cloning)
+            reference_id: Pre-registered reference ID (alternative to reference_audio)
             max_new_tokens: Maximum tokens to generate
             temperature: Sampling temperature (0.0-2.0)
             top_p: Nucleus sampling threshold (0.0-1.0)
@@ -341,9 +343,17 @@ class ProductionTTSEngine:
 
         Raises:
             RuntimeError: If engine is not running
+            ValueError: If reference_audio is provided without reference_text
         """
         if not self.is_running:
             raise RuntimeError("Engine is not running. Call start() first.")
+
+        # Validate reference audio requires reference text
+        if reference_audio is not None and reference_text is None:
+            raise ValueError(
+                "reference_text is required when using reference_audio. "
+                "Provide the text that was spoken in the reference audio."
+            )
 
         # Apply defaults from config
         max_new_tokens = max_new_tokens or self.config.default_max_new_tokens
@@ -357,6 +367,7 @@ class ProductionTTSEngine:
         request = self._create_request(
             text=text,
             reference_audio=reference_audio,
+            reference_text=reference_text,
             reference_id=reference_id,
             max_new_tokens=max_new_tokens,
             temperature=temperature,
@@ -422,6 +433,7 @@ class ProductionTTSEngine:
         self,
         text: str,
         reference_audio: Optional[bytes] = None,
+        reference_text: Optional[str] = None,
         reference_id: Optional[str] = None,
         max_new_tokens: Optional[int] = None,
         temperature: Optional[float] = None,
@@ -439,8 +451,9 @@ class ProductionTTSEngine:
 
         Args:
             text: Text to synthesize
-            reference_audio: Reference audio bytes for voice cloning
-            reference_id: Pre-registered reference ID
+            reference_audio: Reference audio bytes for voice cloning (requires reference_text)
+            reference_text: Text spoken in reference audio (required for voice cloning)
+            reference_id: Pre-registered reference ID (alternative to reference_audio)
             max_new_tokens: Maximum tokens to generate
             temperature: Sampling temperature
             top_p: Nucleus sampling threshold
@@ -459,6 +472,13 @@ class ProductionTTSEngine:
         if not self.is_running:
             raise RuntimeError("Engine is not running. Call start() first.")
 
+        # Validate reference audio requires reference text
+        if reference_audio is not None and reference_text is None:
+            raise ValueError(
+                "reference_text is required when using reference_audio. "
+                "Provide the text that was spoken in the reference audio."
+            )
+
         # Apply defaults
         max_new_tokens = max_new_tokens or self.config.default_max_new_tokens
         temperature = temperature or self.config.default_temperature
@@ -471,6 +491,7 @@ class ProductionTTSEngine:
         request = self._create_request(
             text=text,
             reference_audio=reference_audio,
+            reference_text=reference_text,
             reference_id=reference_id,
             max_new_tokens=max_new_tokens,
             temperature=temperature,
@@ -515,6 +536,7 @@ class ProductionTTSEngine:
         self,
         text: str,
         reference_audio: Optional[bytes],
+        reference_text: Optional[str],
         reference_id: Optional[str],
         max_new_tokens: int,
         temperature: float,
@@ -527,12 +549,18 @@ class ProductionTTSEngine:
         """Create a ServeTTSRequest from parameters."""
         from fish_speech.utils.schema import ServeTTSRequest, ServeReferenceAudio
 
-        # Handle reference audio
+        # Handle reference audio for zero-shot voice cloning
         references = []
-        if reference_audio is not None:
-            # TODO: Proper reference handling with encoding
-            # For now, we'll use the reference_id approach
-            pass
+        if reference_audio is not None and reference_text is not None:
+            # Create ServeReferenceAudio for zero-shot cloning
+            # The TTSInferenceEngine will encode this via load_by_hash()
+            references.append(
+                ServeReferenceAudio(
+                    audio=reference_audio,
+                    text=reference_text,
+                )
+            )
+            logger.debug(f"Created reference audio for zero-shot cloning: {len(reference_audio)} bytes, text: '{reference_text[:50]}...'")
 
         return ServeTTSRequest(
             text=text,
