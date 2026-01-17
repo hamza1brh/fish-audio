@@ -1132,23 +1132,20 @@ def run_benchmark(args):
             import traceback
             traceback.print_exc()
 
-    # Batch Sequential Benchmark
-    # Processes multiple requests sequentially (works with CUDA graphs)
+    # Batch Sequential Benchmark - DISABLED BY DEFAULT
+    # Creating a new engine for batch testing causes CUDA graph TLS assertion errors
+    # because the new engine creates a new worker thread, but CUDA graphs from the
+    # previous benchmark are registered in the old thread's TLS.
+    # The main benchmark already tests with multiple samples, so this is redundant.
     batch_results = None
     if args.batch_size > 0:
-        try:
-            use_int8 = INT8_AVAILABLE
-            batch_results = benchmark_batch_sequential(
-                checkpoint_path=checkpoint_path,
-                num_requests=args.batch_size,
-                runtime_int8=use_int8,
-                dac_int8=use_int8,
-                compile_mode=True,
-            )
-        except Exception as e:
-            print(f"Error in batch benchmark: {e}")
-            import traceback
-            traceback.print_exc()
+        print("\n" + "=" * 70)
+        print("WARNING: Batch benchmark disabled")
+        print("=" * 70)
+        print("  CUDA graphs (reduce-overhead mode) don't support creating")
+        print("  multiple inference engines in the same process.")
+        print("  The main benchmark already tests with multiple samples.")
+        print("  Use --batch-size 0 to suppress this warning.")
 
     # Concurrent benchmarks - DISABLED
     # torch.compile with reduce-overhead mode uses CUDA graphs
@@ -1355,8 +1352,8 @@ Note: torch.compile is always enabled for optimal performance.
     parser.add_argument(
         "--batch-size",
         type=int,
-        default=10,
-        help="Number of sequential requests for batch benchmark (default: 10, 0 to disable)"
+        default=0,
+        help="Batch benchmark disabled (CUDA graph TLS incompatibility). Use 0."
     )
 
     args = parser.parse_args()

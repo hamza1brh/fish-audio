@@ -2,6 +2,8 @@
 
 Deploy Fish-Speech TTS on RunPod for production inference testing.
 
+> **See Also**: [Full Production Deployment Guide](../../docs/PRODUCTION_DEPLOYMENT.md) - Comprehensive documentation covering torch.compile, quantization, batch inference, kernel caching, and SageMaker deployment.
+
 ## Target Environment
 
 - **Image**: `runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04`
