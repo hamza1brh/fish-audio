@@ -212,6 +212,7 @@ def decode_n_tokens(
     audio_masks: torch.Tensor,
     audio_parts: torch.Tensor,
     decode_one_token=decode_one_token_ar,
+    compile: bool = False,
 ):
     previous_tokens = torch.zeros(
         (model.config.num_codebooks + 1, model.config.max_seq_len),
@@ -227,9 +228,22 @@ def decode_n_tokens(
         else:
             window = previous_tokens[:, i - win_size : i]
 
-        with sdpa_kernel(
-            SDPBackend.MATH
-        ):  # Actually better for Inductor to codegen attention here
+        # Use MATH backend only when compile is enabled (better for Inductor codegen)
+        # Otherwise use default (Flash Attention when available) for better perf
+        if compile:
+            with sdpa_kernel(SDPBackend.MATH):
+                next_token = decode_one_token(
+                    model=model,
+                    x=cur_token,
+                    input_pos=input_pos,
+                    previous_tokens=window,
+                    temperature=temperature,
+                    top_p=top_p,
+                    repetition_penalty=repetition_penalty,
+                    audio_masks=audio_masks,
+                    audio_parts=audio_parts,
+                ).clone()
+        else:
             next_token = decode_one_token(
                 model=model,
                 x=cur_token,
@@ -268,6 +282,7 @@ def generate(
     audio_parts: torch.Tensor,
     decode_one_token=decode_one_token_ar,
     num_samples: int = 1,
+    compile: bool = False,
     **sampling_kwargs,
 ):
     """
@@ -367,6 +382,7 @@ def generate(
         audio_masks=audio_masks,
         audio_parts=audio_parts,
         decode_one_token=decode_one_token,
+        compile=compile,
     )
     seq = seq[:, : T + 1 + x.size(1)]
     seq[:, T + 1 :] = x
@@ -524,6 +540,7 @@ def generate_long(
             audio_masks=audio_masks,
             audio_parts=audio_parts,
             decode_one_token=decode_one_token,
+            compile=compile,
             temperature=temperature,
             top_p=top_p,
             repetition_penalty=repetition_penalty,
@@ -612,7 +629,7 @@ def launch_thread_safe_queue(
 
             try:
                 for chunk in generate_long(
-                    model=model, decode_one_token=decode_one_token, **kwargs
+                    model=model, decode_one_token=decode_one_token, compile=compile, **kwargs
                 ):
                     response_queue.put(
                         WrappedGenerateResponse(status="success", response=chunk)
