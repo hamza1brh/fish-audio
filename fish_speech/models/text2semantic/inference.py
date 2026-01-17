@@ -628,6 +628,8 @@ def launch_thread_safe_queue(
             response_queue = item.response_queue
 
             try:
+                # Remove compile from kwargs if present to avoid duplicate argument
+                kwargs.pop("compile", None)
                 for chunk in generate_long(
                     model=model, decode_one_token=decode_one_token, compile=compile, **kwargs
                 ):
