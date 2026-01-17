@@ -1,12 +1,12 @@
 """
 Comprehensive Fish-Speech Benchmark for RunPod
-Tests: BF16 vs INT8, concurrent inference, VRAM usage, throughput
+Tests: BF16 vs INT8, batch inference, VRAM usage, throughput
 Always uses torch.compile for optimal performance.
 
 Run:
   python tools/runpod/benchmark.py                              # Default benchmark
   python tools/runpod/benchmark.py --num-samples 10             # More samples
-  python tools/runpod/benchmark.py --concurrency 4              # Concurrent test
+  python tools/runpod/benchmark.py --batch-size 20              # Batch benchmark with 20 requests
   python tools/runpod/benchmark.py --output report.html         # HTML report
 """
 
@@ -458,6 +458,173 @@ def benchmark_concurrent(
     print(f"  Avg latency: {metrics.avg_latency_s:.2f}s")
     print(f"  Throughput: {metrics.throughput_x_realtime:.2f}x realtime")
     print(f"  Peak VRAM: {peak_vram:.0f} MB")
+
+    # Cleanup
+    del engine, dac, llama_queue
+    clear_vram()
+
+    return metrics
+
+
+@dataclass
+class BatchMetrics:
+    """Metrics for batch/sequential inference benchmark."""
+    config_name: str
+    num_requests: int
+    total_time_s: float
+    total_audio_duration_s: float
+    requests_per_sec: float
+    avg_latency_s: float
+    throughput_x_realtime: float
+    peak_vram_mb: float
+    errors: int = 0
+
+
+def benchmark_batch_sequential(
+    checkpoint_path: str,
+    num_requests: int = 10,
+    runtime_int8: bool = False,
+    dac_int8: bool = False,
+    compile_mode: bool = True,
+) -> BatchMetrics:
+    """
+    Benchmark batch/sequential inference - processes requests one after another.
+    This works with torch.compile and CUDA graphs (unlike concurrent threading).
+    """
+    from fish_speech.models.text2semantic.inference import launch_thread_safe_queue
+    from fish_speech.models.dac.inference import load_model as load_dac_model
+    from fish_speech.inference_engine import TTSInferenceEngine
+    from fish_speech.utils.schema import ServeTTSRequest
+
+    config_name = f"Batch Sequential ({num_requests} requests)"
+    print(f"\n{'='*60}")
+    print(f"Batch Sequential Benchmark")
+    print(f"{'='*60}")
+
+    clear_vram()
+
+    # Load models (reuse compiled kernels from cache)
+    print("Loading models...")
+    precision = torch.bfloat16
+    llama_queue = launch_thread_safe_queue(
+        checkpoint_path=checkpoint_path,
+        device="cuda",
+        precision=precision,
+        compile=compile_mode,
+        runtime_int8=runtime_int8,
+    )
+
+    dac = load_dac_model(
+        config_name="modded_dac_vq",
+        checkpoint_path=str(Path(checkpoint_path) / "codec.pth"),
+        device="cuda",
+        quantize_int8=dac_int8,
+    )
+
+    engine = TTSInferenceEngine(
+        llama_queue=llama_queue,
+        decoder_model=dac,
+        precision=precision,
+        compile=compile_mode,
+    )
+
+    # Warmup (should be fast if kernels are cached)
+    print("Warming up...")
+    warmup_start = time.perf_counter()
+    req = ServeTTSRequest(text="Warmup test.", max_new_tokens=256, streaming=False)
+    for result in engine.inference(req):
+        pass
+    torch.cuda.synchronize()
+    warmup_time = time.perf_counter() - warmup_start
+    print(f"  Warmup time: {warmup_time:.2f}s")
+
+    torch.cuda.reset_peak_memory_stats()
+
+    # Prepare varied test texts
+    test_texts = [
+        "Hello, this is a quick test.",
+        "The quick brown fox jumps over the lazy dog.",
+        "Artificial intelligence is transforming technology and enabling new possibilities.",
+        "今天天气真好，阳光明媚。",
+        "Welcome to our text to speech demonstration.",
+        "This is a longer sentence that should generate more audio content for testing purposes.",
+        "Testing one two three.",
+        "How are you doing today?",
+        "The future of voice synthesis is here.",
+        "Let me tell you a story about technology.",
+    ]
+
+    # Run sequential batch inference
+    print(f"Running {num_requests} sequential requests...")
+    latencies = []
+    audio_durations = []
+    errors = 0
+
+    total_start = time.perf_counter()
+
+    for i in range(num_requests):
+        text = test_texts[i % len(test_texts)]
+        try:
+            req = ServeTTSRequest(
+                text=text,
+                max_new_tokens=1024,
+                temperature=0.7,
+                top_p=0.8,
+                streaming=False,
+            )
+
+            start_time = time.perf_counter()
+            audio_result = None
+
+            for result in engine.inference(req):
+                if result.code == "final":
+                    audio_result = result.audio
+
+            torch.cuda.synchronize()
+            gen_time = time.perf_counter() - start_time
+
+            if audio_result:
+                sample_rate, audio_data = audio_result
+                audio_duration = len(audio_data) / sample_rate
+                latencies.append(gen_time)
+                audio_durations.append(audio_duration)
+                print(f"  [{i+1}/{num_requests}] {gen_time:.2f}s → {audio_duration:.2f}s audio")
+            else:
+                errors += 1
+                print(f"  [{i+1}/{num_requests}] No audio generated")
+
+        except Exception as e:
+            print(f"  [{i+1}/{num_requests}] Error: {e}")
+            errors += 1
+
+    total_time = time.perf_counter() - total_start
+    peak_vram = get_peak_vram_mb()
+
+    # Calculate metrics
+    total_audio = sum(audio_durations)
+    completed = len(latencies)
+
+    metrics = BatchMetrics(
+        config_name=config_name,
+        num_requests=num_requests,
+        total_time_s=total_time,
+        total_audio_duration_s=total_audio,
+        requests_per_sec=completed / total_time if total_time > 0 else 0,
+        avg_latency_s=np.mean(latencies) if latencies else 0,
+        throughput_x_realtime=total_audio / total_time if total_time > 0 else 0,
+        peak_vram_mb=peak_vram,
+        errors=errors,
+    )
+
+    print(f"\nBatch Results:")
+    print(f"  Total time: {total_time:.2f}s for {completed} requests")
+    print(f"  Total audio generated: {total_audio:.2f}s")
+    print(f"  Requests/sec: {metrics.requests_per_sec:.2f}")
+    print(f"  Avg latency: {metrics.avg_latency_s:.2f}s")
+    print(f"  Throughput: {metrics.throughput_x_realtime:.2f}x realtime")
+    print(f"  Peak VRAM: {peak_vram:.0f} MB")
+    if errors > 0:
+        print(f"  Errors: {errors}")
 
     # Cleanup
     del engine, dac, llama_queue
@@ -965,19 +1132,30 @@ def run_benchmark(args):
             import traceback
             traceback.print_exc()
 
-    # Concurrent benchmarks
-    # NOTE: Skipping concurrent benchmark when using torch.compile with reduce-overhead mode
-    # because CUDA graphs don't work well with threading (TLS assertion errors)
-    concurrent_results = []
-    if args.concurrency > 0:
-        print("\n" + "=" * 70)
-        print("Concurrent Benchmark - SKIPPED")
-        print("=" * 70)
-        print("  torch.compile with reduce-overhead mode uses CUDA graphs")
-        print("  which are incompatible with concurrent threading.")
-        print("  Single-request performance is the primary metric for TTS.")
+    # Batch Sequential Benchmark
+    # Processes multiple requests sequentially (works with CUDA graphs)
+    batch_results = None
+    if args.batch_size > 0:
+        try:
+            use_int8 = INT8_AVAILABLE
+            batch_results = benchmark_batch_sequential(
+                checkpoint_path=checkpoint_path,
+                num_requests=args.batch_size,
+                runtime_int8=use_int8,
+                dac_int8=use_int8,
+                compile_mode=True,
+            )
+        except Exception as e:
+            print(f"Error in batch benchmark: {e}")
+            import traceback
+            traceback.print_exc()
 
-    if False and args.concurrency > 0:  # Disabled - see note above
+    # Concurrent benchmarks - DISABLED
+    # torch.compile with reduce-overhead mode uses CUDA graphs
+    # which are incompatible with concurrent threading (TLS assertion errors)
+    concurrent_results = []
+
+    if False:  # Disabled - CUDA graphs don't work with threading
         print("\n" + "=" * 70)
         print("Concurrent Benchmark")
         print("=" * 70)
@@ -1023,6 +1201,13 @@ def run_benchmark(args):
 
     if concurrent_results:
         print(f"\nConcurrent throughput ({args.concurrency} workers): {concurrent_results[-1].requests_per_sec:.2f} requests/sec")
+
+    if batch_results:
+        print(f"\nBatch Sequential ({batch_results.num_requests} requests):")
+        print(f"  Total time: {batch_results.total_time_s:.2f}s")
+        print(f"  Total audio: {batch_results.total_audio_duration_s:.2f}s")
+        print(f"  Throughput: {batch_results.throughput_x_realtime:.2f}x realtime")
+        print(f"  Requests/sec: {batch_results.requests_per_sec:.2f}")
 
     # Generate plots
     print("\nGenerating plots...")
@@ -1084,6 +1269,16 @@ def run_benchmark(args):
                 }
                 for r in concurrent_results
             ],
+            "batch_results": {
+                "num_requests": batch_results.num_requests,
+                "total_time_s": batch_results.total_time_s,
+                "total_audio_duration_s": batch_results.total_audio_duration_s,
+                "requests_per_sec": batch_results.requests_per_sec,
+                "avg_latency_s": batch_results.avg_latency_s,
+                "throughput_x_realtime": batch_results.throughput_x_realtime,
+                "peak_vram_mb": batch_results.peak_vram_mb,
+                "errors": batch_results.errors,
+            } if batch_results else None,
         }
 
         with open(args.json, "w") as f:
@@ -1120,11 +1315,12 @@ def main():
 Examples:
   python tools/runpod/benchmark.py                              # Default benchmark
   python tools/runpod/benchmark.py --num-samples 10             # More samples
-  python tools/runpod/benchmark.py --concurrency 4              # Concurrent test
+  python tools/runpod/benchmark.py --batch-size 20              # Batch with 20 requests
   python tools/runpod/benchmark.py --output report.html         # HTML report
   python tools/runpod/benchmark.py --json results.json          # JSON export
 
 Note: torch.compile is always enabled for optimal performance.
+      Concurrent threading is disabled (incompatible with CUDA graphs).
         """
     )
 
@@ -1155,6 +1351,12 @@ Note: torch.compile is always enabled for optimal performance.
         type=int,
         default=2,
         help="Number of warmup iterations before benchmarking (default: 2)"
+    )
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=10,
+        help="Number of sequential requests for batch benchmark (default: 10, 0 to disable)"
     )
 
     args = parser.parse_args()
