@@ -326,14 +326,24 @@ class EngineConfig:
     # Batching Configuration
     # ==========================================================================
 
+    enable_batching: bool = field(
+        default=True,
+        metadata={"help": "Enable batched inference for multiple requests"},
+    )
+
     max_batch_size: int = field(
-        default=1,
+        default=4,
         metadata={"help": "Maximum number of requests per batch"},
     )
 
     batch_timeout_ms: int = field(
-        default=50,
+        default=200,
         metadata={"help": "Milliseconds to wait for batch to fill"},
+    )
+
+    batch_grouping: bool = field(
+        default=True,
+        metadata={"help": "Group requests by reference audio for efficient batching"},
     )
 
     # ==========================================================================
@@ -523,8 +533,10 @@ class EngineConfig:
             "precision": get_env("PRECISION"),
             "compile_model": get_env_bool("COMPILE", default=True),
             "compile_backend": get_env("COMPILE_BACKEND", default="auto"),
-            "max_batch_size": get_env_int("BATCH_SIZE", default=1),
-            "batch_timeout_ms": get_env_int("BATCH_TIMEOUT", default=50),
+            "enable_batching": get_env_bool("ENABLE_BATCHING", default=True),
+            "max_batch_size": get_env_int("BATCH_SIZE", default=4),
+            "batch_timeout_ms": get_env_int("BATCH_TIMEOUT", default=200),
+            "batch_grouping": get_env_bool("BATCH_GROUPING", default=True),
             "request_timeout_seconds": get_env_float("REQUEST_TIMEOUT", default=60.0),
             "vram_clear_on_oom_only": get_env_bool("VRAM_CLEAR_ON_OOM_ONLY", default=True),
             "vram_clear_threshold_gb": get_env_float("VRAM_THRESHOLD", default=2.0),
@@ -547,8 +559,10 @@ class EngineConfig:
             "compile_model": self.compile_model,
             "compile_backend": self.compile_backend,
             "resolved_compile_backend": self.resolved_compile_backend,
+            "enable_batching": self.enable_batching,
             "max_batch_size": self.max_batch_size,
             "batch_timeout_ms": self.batch_timeout_ms,
+            "batch_grouping": self.batch_grouping,
             "request_timeout_seconds": self.request_timeout_seconds,
             "vram_clear_on_oom_only": self.vram_clear_on_oom_only,
         }

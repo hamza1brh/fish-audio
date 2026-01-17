@@ -115,11 +115,28 @@ class ReferenceLoader:
         """
         Load the audio data from a file or bytes.
         """
+        import soundfile as sf
+        import numpy as np
+
         if len(reference_audio) > 255 or not Path(reference_audio).exists():
             audio_data = reference_audio
             reference_audio = io.BytesIO(audio_data)
 
-        waveform, original_sr = torchaudio.load(reference_audio, backend=self.backend)
+        # Use soundfile directly (torchaudio 2.9+ has backend issues)
+        try:
+            audio_np, original_sr = sf.read(reference_audio)
+            # Convert to float32 if needed
+            audio_np = audio_np.astype(np.float32)
+            # Handle stereo -> mono
+            if len(audio_np.shape) > 1 and audio_np.shape[1] > 1:
+                audio_np = np.mean(audio_np, axis=1)
+            waveform = torch.from_numpy(audio_np).unsqueeze(0)
+        except Exception as e:
+            # Fallback to torchaudio if soundfile fails
+            logger.warning(f"soundfile failed, trying torchaudio: {e}")
+            if isinstance(reference_audio, io.BytesIO):
+                reference_audio.seek(0)
+            waveform, original_sr = torchaudio.load(reference_audio, backend=self.backend)
 
         if waveform.shape[0] > 1:
             waveform = torch.mean(waveform, dim=0, keepdim=True)

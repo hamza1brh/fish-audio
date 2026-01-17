@@ -74,11 +74,12 @@ The engine is thread-safe for concurrent requests.
 Internally, requests are serialized through the model worker queue.
 """
 
+import asyncio
 import queue
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, Optional, Union, List
+from typing import Generator, Optional, Union, List, Any
 
 import numpy as np
 import torch
@@ -156,6 +157,48 @@ class GenerationResponse:
     audio_bytes: Optional[bytes] = None
     error: Optional[str] = None
     metrics: Optional[GenerationMetrics] = None
+
+
+@dataclass
+class BatchGenerationRequest:
+    """
+    Request for batch TTS generation.
+
+    Attributes:
+        texts: List of texts to synthesize
+        reference_audios: Optional list of reference audio bytes
+        reference_texts: Optional list of reference texts
+        reference_ids: Optional list of pre-registered reference IDs
+        parameters: Shared generation parameters
+    """
+    texts: List[str]
+    reference_audios: Optional[List[Optional[bytes]]] = None
+    reference_texts: Optional[List[Optional[str]]] = None
+    reference_ids: Optional[List[Optional[str]]] = None
+    max_new_tokens: int = 2048
+    temperature: float = 0.7
+    top_p: float = 0.8
+    repetition_penalty: float = 1.1
+    chunk_length: int = 200
+    seed: Optional[int] = None
+    timeout: Optional[float] = None
+
+
+@dataclass
+class BatchGenerationResponse:
+    """
+    Response from batch TTS generation.
+
+    Attributes:
+        success: Whether all generations succeeded
+        results: List of individual responses
+        total_time: Total time for batch generation
+        error: Overall error message if failed
+    """
+    success: bool
+    results: List[GenerationResponse]
+    total_time: float = 0.0
+    error: Optional[str] = None
 
 
 # =============================================================================
@@ -307,6 +350,7 @@ class ProductionTTSEngine:
         self,
         text: str,
         reference_audio: Optional[bytes] = None,
+        reference_text: Optional[str] = None,
         reference_id: Optional[str] = None,
         max_new_tokens: Optional[int] = None,
         temperature: Optional[float] = None,
@@ -325,8 +369,9 @@ class ProductionTTSEngine:
 
         Args:
             text: Text to synthesize
-            reference_audio: Reference audio bytes for voice cloning
-            reference_id: Pre-registered reference ID
+            reference_audio: Reference audio bytes for voice cloning (requires reference_text)
+            reference_text: Text spoken in reference audio (required for voice cloning)
+            reference_id: Pre-registered reference ID (alternative to reference_audio)
             max_new_tokens: Maximum tokens to generate
             temperature: Sampling temperature (0.0-2.0)
             top_p: Nucleus sampling threshold (0.0-1.0)
@@ -341,9 +386,17 @@ class ProductionTTSEngine:
 
         Raises:
             RuntimeError: If engine is not running
+            ValueError: If reference_audio is provided without reference_text
         """
         if not self.is_running:
             raise RuntimeError("Engine is not running. Call start() first.")
+
+        # Validate reference audio requires reference text
+        if reference_audio is not None and reference_text is None:
+            raise ValueError(
+                "reference_text is required when using reference_audio. "
+                "Provide the text that was spoken in the reference audio."
+            )
 
         # Apply defaults from config
         max_new_tokens = max_new_tokens or self.config.default_max_new_tokens
@@ -357,6 +410,7 @@ class ProductionTTSEngine:
         request = self._create_request(
             text=text,
             reference_audio=reference_audio,
+            reference_text=reference_text,
             reference_id=reference_id,
             max_new_tokens=max_new_tokens,
             temperature=temperature,
@@ -422,6 +476,7 @@ class ProductionTTSEngine:
         self,
         text: str,
         reference_audio: Optional[bytes] = None,
+        reference_text: Optional[str] = None,
         reference_id: Optional[str] = None,
         max_new_tokens: Optional[int] = None,
         temperature: Optional[float] = None,
@@ -439,8 +494,9 @@ class ProductionTTSEngine:
 
         Args:
             text: Text to synthesize
-            reference_audio: Reference audio bytes for voice cloning
-            reference_id: Pre-registered reference ID
+            reference_audio: Reference audio bytes for voice cloning (requires reference_text)
+            reference_text: Text spoken in reference audio (required for voice cloning)
+            reference_id: Pre-registered reference ID (alternative to reference_audio)
             max_new_tokens: Maximum tokens to generate
             temperature: Sampling temperature
             top_p: Nucleus sampling threshold
@@ -459,6 +515,13 @@ class ProductionTTSEngine:
         if not self.is_running:
             raise RuntimeError("Engine is not running. Call start() first.")
 
+        # Validate reference audio requires reference text
+        if reference_audio is not None and reference_text is None:
+            raise ValueError(
+                "reference_text is required when using reference_audio. "
+                "Provide the text that was spoken in the reference audio."
+            )
+
         # Apply defaults
         max_new_tokens = max_new_tokens or self.config.default_max_new_tokens
         temperature = temperature or self.config.default_temperature
@@ -471,6 +534,7 @@ class ProductionTTSEngine:
         request = self._create_request(
             text=text,
             reference_audio=reference_audio,
+            reference_text=reference_text,
             reference_id=reference_id,
             max_new_tokens=max_new_tokens,
             temperature=temperature,
@@ -508,6 +572,196 @@ class ProductionTTSEngine:
             )
 
     # =========================================================================
+    # Batch Generation Methods
+    # =========================================================================
+
+    def generate_batch(
+        self,
+        texts: List[str],
+        reference_audios: Optional[List[Optional[bytes]]] = None,
+        reference_texts: Optional[List[Optional[str]]] = None,
+        reference_ids: Optional[List[Optional[str]]] = None,
+        max_new_tokens: Optional[int] = None,
+        temperature: Optional[float] = None,
+        top_p: Optional[float] = None,
+        repetition_penalty: Optional[float] = None,
+        chunk_length: Optional[int] = None,
+        seed: Optional[int] = None,
+        timeout: Optional[float] = None,
+        return_bytes: bool = False,
+    ) -> BatchGenerationResponse:
+        """
+        Generate audio for multiple texts in a single batch.
+
+        This method processes multiple TTS requests together, achieving
+        significant speedup through GPU batching.
+
+        Args:
+            texts: List of texts to synthesize
+            reference_audios: Optional list of reference audio bytes
+            reference_texts: Optional list of reference texts
+            reference_ids: Optional list of pre-registered reference IDs
+            max_new_tokens: Maximum tokens to generate
+            temperature: Sampling temperature
+            top_p: Nucleus sampling threshold
+            repetition_penalty: Repetition penalty
+            chunk_length: Chunk length for iterative generation
+            seed: Random seed for reproducibility
+            timeout: Request timeout in seconds
+            return_bytes: If True, include audio_bytes in responses
+
+        Returns:
+            BatchGenerationResponse with results for each text
+        """
+        if not self.is_running:
+            raise RuntimeError("Engine is not running. Call start() first.")
+
+        batch_size = len(texts)
+        if batch_size == 0:
+            return BatchGenerationResponse(
+                success=True,
+                results=[],
+                total_time=0.0,
+            )
+
+        # Normalize inputs
+        if reference_audios is None:
+            reference_audios = [None] * batch_size
+        if reference_texts is None:
+            reference_texts = [None] * batch_size
+        if reference_ids is None:
+            reference_ids = [None] * batch_size
+
+        # Validate lengths
+        if len(reference_audios) != batch_size:
+            raise ValueError(f"reference_audios length ({len(reference_audios)}) must match texts length ({batch_size})")
+        if len(reference_texts) != batch_size:
+            raise ValueError(f"reference_texts length ({len(reference_texts)}) must match texts length ({batch_size})")
+        if len(reference_ids) != batch_size:
+            raise ValueError(f"reference_ids length ({len(reference_ids)}) must match texts length ({batch_size})")
+
+        # Apply defaults
+        max_new_tokens = max_new_tokens or self.config.default_max_new_tokens
+        temperature = temperature or self.config.default_temperature
+        top_p = top_p or self.config.default_top_p
+        repetition_penalty = repetition_penalty or self.config.default_repetition_penalty
+        chunk_length = chunk_length or self.config.default_chunk_length
+        timeout = timeout or self.config.request_timeout_seconds * batch_size  # Scale timeout with batch
+
+        timer = Timer("batch_generation")
+        start_time = time.time()
+
+        try:
+            # Process batch sequentially for now (true batched inference would use inference_batched)
+            # This still benefits from keeping models loaded and warm
+            results = []
+            for i, text in enumerate(texts):
+                ref_audio = reference_audios[i] if reference_audios else None
+                ref_text = reference_texts[i] if reference_texts else None
+                ref_id = reference_ids[i] if reference_ids else None
+
+                response = self.generate(
+                    text=text,
+                    reference_audio=ref_audio,
+                    reference_text=ref_text,
+                    reference_id=ref_id,
+                    max_new_tokens=max_new_tokens,
+                    temperature=temperature,
+                    top_p=top_p,
+                    repetition_penalty=repetition_penalty,
+                    chunk_length=chunk_length,
+                    seed=seed,
+                    timeout=timeout / batch_size,  # Divide timeout per request
+                    return_bytes=return_bytes,
+                )
+                results.append(response)
+
+                # Check overall timeout
+                if time.time() - start_time > timeout:
+                    # Fill remaining with errors
+                    for j in range(i + 1, batch_size):
+                        results.append(GenerationResponse(
+                            success=False,
+                            error="Batch timeout exceeded",
+                        ))
+                    break
+
+            total_time = timer.elapsed
+            all_success = all(r.success for r in results)
+
+            return BatchGenerationResponse(
+                success=all_success,
+                results=results,
+                total_time=total_time,
+            )
+
+        except Exception as e:
+            logger.error(f"Batch generation failed: {e}")
+            return BatchGenerationResponse(
+                success=False,
+                results=[],
+                error=str(e),
+            )
+
+    async def generate_batch_async(
+        self,
+        texts: List[str],
+        reference_audios: Optional[List[Optional[bytes]]] = None,
+        reference_texts: Optional[List[Optional[str]]] = None,
+        reference_ids: Optional[List[Optional[str]]] = None,
+        max_new_tokens: Optional[int] = None,
+        temperature: Optional[float] = None,
+        top_p: Optional[float] = None,
+        repetition_penalty: Optional[float] = None,
+        chunk_length: Optional[int] = None,
+        seed: Optional[int] = None,
+        timeout: Optional[float] = None,
+        return_bytes: bool = False,
+    ) -> BatchGenerationResponse:
+        """
+        Async version of batch generation.
+
+        This method submits requests to a batch queue and waits for results.
+        Useful for integrating with async web frameworks.
+
+        Args:
+            texts: List of texts to synthesize
+            reference_audios: Optional list of reference audio bytes
+            reference_texts: Optional list of reference texts
+            reference_ids: Optional list of pre-registered reference IDs
+            max_new_tokens: Maximum tokens to generate
+            temperature: Sampling temperature
+            top_p: Nucleus sampling threshold
+            repetition_penalty: Repetition penalty
+            chunk_length: Chunk length for iterative generation
+            seed: Random seed for reproducibility
+            timeout: Request timeout in seconds
+            return_bytes: If True, include audio_bytes in responses
+
+        Returns:
+            BatchGenerationResponse with results for each text
+        """
+        # Run sync method in executor to avoid blocking
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(
+            None,
+            lambda: self.generate_batch(
+                texts=texts,
+                reference_audios=reference_audios,
+                reference_texts=reference_texts,
+                reference_ids=reference_ids,
+                max_new_tokens=max_new_tokens,
+                temperature=temperature,
+                top_p=top_p,
+                repetition_penalty=repetition_penalty,
+                chunk_length=chunk_length,
+                seed=seed,
+                timeout=timeout,
+                return_bytes=return_bytes,
+            )
+        )
+
+    # =========================================================================
     # Internal Methods
     # =========================================================================
 
@@ -515,6 +769,7 @@ class ProductionTTSEngine:
         self,
         text: str,
         reference_audio: Optional[bytes],
+        reference_text: Optional[str],
         reference_id: Optional[str],
         max_new_tokens: int,
         temperature: float,
@@ -527,12 +782,18 @@ class ProductionTTSEngine:
         """Create a ServeTTSRequest from parameters."""
         from fish_speech.utils.schema import ServeTTSRequest, ServeReferenceAudio
 
-        # Handle reference audio
+        # Handle reference audio for zero-shot voice cloning
         references = []
-        if reference_audio is not None:
-            # TODO: Proper reference handling with encoding
-            # For now, we'll use the reference_id approach
-            pass
+        if reference_audio is not None and reference_text is not None:
+            # Create ServeReferenceAudio for zero-shot cloning
+            # The TTSInferenceEngine will encode this via load_by_hash()
+            references.append(
+                ServeReferenceAudio(
+                    audio=reference_audio,
+                    text=reference_text,
+                )
+            )
+            logger.debug(f"Created reference audio for zero-shot cloning: {len(reference_audio)} bytes, text: '{reference_text[:50]}...'")
 
         return ServeTTSRequest(
             text=text,

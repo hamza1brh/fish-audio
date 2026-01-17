@@ -12,7 +12,19 @@
       "WebSearch",
       "Bash(wsl --list:*)",
       "Bash(wsl:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix PyTorch 2.2.x compatibility for SageMaker\n\nAdd compatibility shim for torch.nn.attention module which was added in\nPyTorch 2.5+. SageMaker uses PyTorch 2.2.2 which uses the older\ntorch.backends.cuda.sdp_kernel API.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "WebFetch(domain:docs.pytorch.org)",
+      "Bash(python3:*)",
+      "Bash(streamlit run:*)",
+      "Bash(.venv/Scripts/python:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill /F /PID 70092)",
+      "Bash(.venv/Scripts/pip install:*)"
     ],
     "deny": [],
     "ask": []

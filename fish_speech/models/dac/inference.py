@@ -20,14 +20,24 @@ from fish_speech.utils.file import AUDIO_EXTENSIONS
 OmegaConf.register_new_resolver("eval", eval)
 
 
-def load_model(config_name, checkpoint_path, device="cuda"):
+def load_model(config_name, checkpoint_path, device="cuda", quantize_int8=False):
+    """
+    Load DAC decoder model.
+
+    Args:
+        config_name: Hydra config name (e.g., "modded_dac_vq")
+        checkpoint_path: Path to codec.pth file
+        device: Target device ("cuda" or "cpu")
+        quantize_int8: If True, apply INT8 weight-only quantization to reduce VRAM
+                       (~1.87 GB -> ~0.97 GB, ~48% reduction)
+    """
     hydra.core.global_hydra.GlobalHydra.instance().clear()
     with initialize(version_base="1.3", config_path="../../configs"):
         cfg = compose(config_name=config_name)
 
     model = instantiate(cfg)
     state_dict = torch.load(
-        checkpoint_path, map_location=device, mmap=True, weights_only=True
+        str(checkpoint_path), map_location=device, mmap=True, weights_only=True
     )
     if "state_dict" in state_dict:
         state_dict = state_dict["state_dict"]
@@ -44,6 +54,21 @@ def load_model(config_name, checkpoint_path, device="cuda"):
     model.to(device)
 
     logger.info(f"Loaded model: {result}")
+
+    # Apply INT8 quantization if requested
+    if quantize_int8 and device != "cpu":
+        try:
+            from torchao.quantization import quantize_, Int8WeightOnlyConfig
+            logger.info("Applying INT8 quantization to DAC decoder...")
+            vram_before = torch.cuda.memory_allocated() / 1e6 if torch.cuda.is_available() else 0
+            quantize_(model, Int8WeightOnlyConfig())
+            vram_after = torch.cuda.memory_allocated() / 1e6 if torch.cuda.is_available() else 0
+            logger.info(f"DAC INT8 quantization complete. VRAM: {vram_before:.1f} MB -> {vram_after:.1f} MB (saved {vram_before - vram_after:.1f} MB)")
+        except ImportError:
+            logger.warning("TorchAO not available for DAC INT8 quantization")
+        except Exception as e:
+            logger.warning(f"Failed to apply INT8 quantization to DAC: {e}")
+
     return model
 
 

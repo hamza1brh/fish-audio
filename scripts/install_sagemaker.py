@@ -1,12 +1,20 @@
 #!/usr/bin/env python3
 """
-Fish Speech - SageMaker Installation Script
+Fish Speech - SageMaker Studio Installation Script
 
 This script installs all dependencies in the correct order to avoid conflicts.
-Tested on SageMaker ml.g4dn, ml.g5, ml.p3, and ml.p4 instances.
+Designed for SageMaker Studio (Jupyter IDE) with GPU instances.
+
+Tested on:
+- SageMaker Studio ml.g4dn.xlarge (T4)
+- SageMaker Studio ml.g5.xlarge (A10G)
+- SageMaker Studio ml.p3.2xlarge (V100)
 
 Usage:
     python scripts/install_sagemaker.py
+
+    Or in a notebook:
+    !python scripts/install_sagemaker.py
 """
 
 import subprocess
@@ -44,15 +52,33 @@ def check_gpu():
         return True
     else:
         print("⚠ No GPU detected. Continuing with CPU-only setup...")
+        print("  Note: For real-time TTS, use a GPU instance (ml.g4dn.xlarge or higher)")
+        return False
+
+
+def check_sagemaker_studio():
+    """Check if running in SageMaker Studio."""
+    # SageMaker Studio sets specific env vars
+    is_studio = os.environ.get('AWS_SAGEMAKER_JUPYTERSERVER_IMAGE') is not None
+    is_sagemaker = '/home/sagemaker-user' in os.environ.get('HOME', '')
+
+    if is_studio or is_sagemaker:
+        print("✓ Running in SageMaker Studio")
+        return True
+    else:
+        print("  Not in SageMaker Studio (local environment)")
         return False
 
 
 def main():
     print("""
 ╔══════════════════════════════════════════════════════════════════╗
-║           Fish Speech - SageMaker Installation                   ║
+║        Fish Speech - SageMaker Studio Installation               ║
 ╚══════════════════════════════════════════════════════════════════╝
 """)
+
+    # Check environment
+    check_sagemaker_studio()
 
     # Find project root
     script_dir = Path(__file__).parent
@@ -259,18 +285,38 @@ else:
     print("="*60)
 
     print("""
-Next steps:
+Next steps for SageMaker Studio:
 
-1. Download the model:
-   python -c "from huggingface_hub import snapshot_download; snapshot_download('fishaudio/openaudio-s1-mini', local_dir='checkpoints/openaudio-s1-mini')"
+1. Download the model (run in notebook cell):
 
-2. Test inference:
-   python -m s1_mini.tts --text "Hello, this is a test."
+   from huggingface_hub import snapshot_download
+   snapshot_download('fishaudio/openaudio-s1-mini', local_dir='checkpoints/openaudio-s1-mini')
 
-3. Start API server:
-   python -m s1_mini.server
+2. Test TTS in notebook:
 
-For troubleshooting, see SAGEMAKER_SETUP.md
+   from s1_mini import ProductionTTSEngine, EngineConfig
+   from IPython.display import Audio
+
+   config = EngineConfig(checkpoint_path="checkpoints/openaudio-s1-mini")
+   engine = ProductionTTSEngine(config)
+   engine.start()
+
+   response = engine.generate(text="Hello from SageMaker Studio!")
+   sample_rate, audio = response.audio
+   Audio(audio, rate=sample_rate)
+
+3. Zero-shot voice cloning:
+
+   with open("reference.wav", "rb") as f:
+       ref_audio = f.read()
+
+   response = engine.generate(
+       text="Text to speak in cloned voice",
+       reference_audio=ref_audio,
+       reference_text="Text spoken in reference audio"
+   )
+
+See sagemaker_studio_setup.ipynb for a complete walkthrough.
 """)
 
     return 0

@@ -31,7 +31,34 @@ if hasattr(torch._inductor.config, "fx_graph_cache"):
     torch._inductor.config.fx_graph_cache = True
 
 
-from torch.nn.attention import SDPBackend, sdpa_kernel
+# PyTorch version compatibility for attention backend selection
+# torch.nn.attention was added in PyTorch 2.5+
+try:
+    from torch.nn.attention import SDPBackend, sdpa_kernel
+except ImportError:
+    # Fallback for PyTorch < 2.5 (e.g., 2.2.x on SageMaker)
+    from contextlib import contextmanager
+
+    class SDPBackend:
+        FLASH_ATTENTION = "flash"
+        EFFICIENT_ATTENTION = "efficient"
+        MATH = "math"
+
+    @contextmanager
+    def sdpa_kernel(backend):
+        """Compatibility shim for PyTorch < 2.5"""
+        if hasattr(torch.backends.cuda, "sdp_kernel"):
+            enable_flash = backend == SDPBackend.FLASH_ATTENTION
+            enable_efficient = backend == SDPBackend.EFFICIENT_ATTENTION
+            enable_math = backend == SDPBackend.MATH
+            with torch.backends.cuda.sdp_kernel(
+                enable_flash=enable_flash,
+                enable_math=enable_math,
+                enable_mem_efficient=enable_efficient,
+            ):
+                yield
+        else:
+            yield
 
 from fish_speech.models.text2semantic.llama import (
     BaseTransformer,
@@ -350,11 +377,35 @@ def generate(
     return seq
 
 
-def init_model(checkpoint_path, device, precision, compile=False):
+def init_model(checkpoint_path, device, precision, compile=False, runtime_int4=False, runtime_int8=False):
     model = DualARTransformer.from_pretrained(checkpoint_path, load_weights=True)
 
     model = model.to(device=device, dtype=precision)
     logger.info(f"Restored model from checkpoint")
+
+    # Apply runtime quantization if requested
+    # This avoids the CPU->CUDA dequantization issues with saved quantized checkpoints
+    if runtime_int8 and device != "cpu":
+        try:
+            from torchao.quantization import quantize_, Int8WeightOnlyConfig
+            logger.info("Applying runtime INT8 quantization...")
+            quantize_(model, Int8WeightOnlyConfig())
+            vram_mb = torch.cuda.memory_allocated() / 1e6
+            logger.info(f"Runtime INT8 quantization complete. VRAM: {vram_mb:.1f} MB")
+        except ImportError:
+            logger.warning("TorchAO not available for runtime INT8 quantization")
+    elif runtime_int4 and device != "cpu":
+        try:
+            import warnings
+            from torchao.quantization import quantize_, Int4WeightOnlyConfig
+            logger.info("Applying runtime INT4 quantization...")
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore")
+                quantize_(model, Int4WeightOnlyConfig(group_size=128, version=1))
+            vram_mb = torch.cuda.memory_allocated() / 1e6
+            logger.info(f"Runtime INT4 quantization complete. VRAM: {vram_mb:.1f} MB")
+        except ImportError:
+            logger.warning("TorchAO not available for runtime INT4 quantization")
 
     if isinstance(model, DualARTransformer):
         decode_one_token = decode_one_token_ar
@@ -532,13 +583,16 @@ def launch_thread_safe_queue(
     device,
     precision,
     compile: bool = False,
+    runtime_int4: bool = False,
+    runtime_int8: bool = False,
 ):
     input_queue = queue.Queue()
     init_event = threading.Event()
 
     def worker():
         model, decode_one_token = init_model(
-            checkpoint_path, device, precision, compile=compile
+            checkpoint_path, device, precision, compile=compile,
+            runtime_int4=runtime_int4, runtime_int8=runtime_int8
         )
         with torch.device(device):
             model.setup_caches(

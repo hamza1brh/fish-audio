@@ -12,8 +12,38 @@ from einops import rearrange
 from loguru import logger
 from torch import Tensor
 from torch.nn import functional as F
-from torch.nn.attention import SDPBackend, sdpa_kernel
 from torch.utils.checkpoint import checkpoint
+
+# PyTorch version compatibility for attention backend selection
+# torch.nn.attention was added in PyTorch 2.5+
+try:
+    from torch.nn.attention import SDPBackend, sdpa_kernel
+except ImportError:
+    # Fallback for PyTorch < 2.5 (e.g., 2.2.x on SageMaker)
+    from contextlib import contextmanager
+
+    class SDPBackend:
+        FLASH_ATTENTION = "flash"
+        EFFICIENT_ATTENTION = "efficient"
+        MATH = "math"
+
+    @contextmanager
+    def sdpa_kernel(backend):
+        """Compatibility shim for PyTorch < 2.5"""
+        if hasattr(torch.backends.cuda, "sdp_kernel"):
+            # PyTorch 2.0-2.4 API
+            enable_flash = backend == SDPBackend.FLASH_ATTENTION
+            enable_efficient = backend == SDPBackend.EFFICIENT_ATTENTION
+            enable_math = backend == SDPBackend.MATH
+            with torch.backends.cuda.sdp_kernel(
+                enable_flash=enable_flash,
+                enable_math=enable_math,
+                enable_mem_efficient=enable_efficient,
+            ):
+                yield
+        else:
+            # No backend selection available, just proceed
+            yield
 from transformers import AutoTokenizer
 
 from fish_speech.models.text2semantic.lora import LoraConfig, setup_lora
@@ -24,6 +54,21 @@ def find_multiple(n: int, k: int) -> int:
     if n % k == 0:
         return n
     return n + k - (n % k)
+
+
+# RMSNorm defined early for PyTorch < 2.4 compatibility (nn.RMSNorm was added in 2.4)
+class RMSNorm(nn.Module):
+    def __init__(self, dim: int, eps: float = 1e-5):
+        super().__init__()
+        self.eps = eps
+        self.weight = nn.Parameter(torch.ones(dim))
+
+    def _norm(self, x):
+        return x * torch.rsqrt(torch.mean(x * x, dim=-1, keepdim=True) + self.eps)
+
+    def forward(self, x: Tensor) -> Tensor:
+        output = self._norm(x.float()).type_as(x)
+        return output * self.weight
 
 
 @dataclass
@@ -79,6 +124,10 @@ class BaseModelArgs:
 
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
+
+        # Remove quantization metadata (added by TorchAO quantization script)
+        # This is not part of the model config
+        data.pop("quantization", None)
 
         match data["model_type"]:
             case "naive":
@@ -435,63 +484,130 @@ class BaseTransformer(nn.Module):
         if load_weights is False:
             logger.info("Randomly initialized model")
         else:
+            # Check for TorchAO quantization metadata in config.json
+            config_json_path = Path(path) / "config.json"
+            quantization_info = None
+            if config_json_path.exists():
+                import json
+                with open(config_json_path, "r") as f:
+                    config_data = json.load(f)
+                quantization_info = config_data.get("quantization")
 
-            if "int8" in str(Path(path)):
-                logger.info("Using int8 weight-only quantization!")
-                from tools.llama.quantize import WeightOnlyInt8QuantHandler
+            # Handle TorchAO quantized models (modern approach)
+            if quantization_info and quantization_info.get("method") == "torchao":
+                logger.info(f"Loading TorchAO quantized model: {quantization_info}")
+
+                # TorchAO uses custom tensor types that need to be whitelisted for safe loading
+                try:
+                    from torchao.dtypes.affine_quantized_tensor import AffineQuantizedTensor
+                    from torchao.dtypes.uintx.tensor_core_tiled_layout import TensorCoreTiledAQTTensorImpl
+                    torch.serialization.add_safe_globals([AffineQuantizedTensor, TensorCoreTiledAQTTensorImpl])
+                except ImportError:
+                    logger.warning("TorchAO not installed, loading with weights_only=False")
+
+                weights = torch.load(
+                    str(Path(path) / "model.pth"),
+                    map_location="cpu",
+                    weights_only=False,  # TorchAO tensors require this
+                )
+                # TorchAO models use tensor subclasses, must use assign=True
+                err = model.load_state_dict(weights, strict=False, assign=True)
+                logger.info(f"Loaded TorchAO quantized weights: {err}")
+
+            # Handle legacy int8 quantization (backward compatibility)
+            elif "int8" in str(Path(path)) and "torchao" not in str(Path(path)):
+                import warnings
+                warnings.warn(
+                    "Using legacy int8 quantization. Consider re-quantizing with TorchAO for better performance: "
+                    "python tools/llama/quantize_torchao.py --mode int8",
+                    DeprecationWarning,
+                )
+                logger.info("Using legacy int8 weight-only quantization!")
+                from tools.llama.quantize_legacy import WeightOnlyInt8QuantHandler
 
                 simple_quantizer = WeightOnlyInt8QuantHandler(model)
                 model = simple_quantizer.convert_for_runtime()
 
-            if "int4" in str(Path(path)):
-                logger.info("Using int4 quantization!")
-                path_comps = path.name.split("-")
-                assert path_comps[-2].startswith("g")
-                groupsize = int(path_comps[-2][1:])
-                from tools.llama.quantize import WeightOnlyInt4QuantHandler
+                weights = torch.load(
+                    str(Path(path) / "model.pth"),
+                    map_location="cpu",
+                    mmap=True,
+                    weights_only=True,
+                )
+                err = model.load_state_dict(weights, strict=False, assign=True)
+                logger.info(f"Loaded legacy int8 weights: {err}")
+
+            # Handle legacy int4 quantization (backward compatibility)
+            elif "int4" in str(Path(path)) and "torchao" not in str(Path(path)):
+                import warnings
+                warnings.warn(
+                    "Using legacy int4 quantization. Consider re-quantizing with TorchAO for better performance: "
+                    "python tools/llama/quantize_torchao.py --mode int4",
+                    DeprecationWarning,
+                )
+                logger.info("Using legacy int4 quantization!")
+                path_comps = Path(path).name.split("-")
+                # Find groupsize from path (e.g., g128)
+                groupsize = 128  # default
+                for comp in path_comps:
+                    if comp.startswith("g") and comp[1:].isdigit():
+                        groupsize = int(comp[1:])
+                        break
+                from tools.llama.quantize_legacy import WeightOnlyInt4QuantHandler
 
                 simple_quantizer = WeightOnlyInt4QuantHandler(model, groupsize)
                 model = simple_quantizer.convert_for_runtime()
 
-            weights = torch.load(
-                Path(path) / "model.pth",
-                map_location="cpu",
-                mmap=True,
-                weights_only=True,
-            )
-
-            if "state_dict" in weights:
-                logger.warning(
-                    "Using a TextToSemantic LightningModule checkpoint, "
-                    "please make sure it is a full model, not a LoRA model."
+                weights = torch.load(
+                    str(Path(path) / "model.pth"),
+                    map_location="cpu",
+                    mmap=True,
+                    weights_only=True,
                 )
-                weights = weights["state_dict"]
+                err = model.load_state_dict(weights, strict=False, assign=True)
+                logger.info(f"Loaded legacy int4 weights: {err}")
 
-            if next(iter(weights.keys())).startswith("model."):
-                logger.info(
-                    f"Remove prefix 'model.' created by TextToSemantic LightningModule from keys"
+            # Standard (non-quantized) model loading
+            else:
+                weights = torch.load(
+                    str(Path(path) / "model.pth"),
+                    map_location="cpu",
+                    mmap=True,
+                    weights_only=True,
                 )
-                new_weights = OrderedDict()
-                for k, v in weights.items():
-                    new_weights[k.replace("model.", "")] = v
-                weights = new_weights
 
-            # Remove audio related weights
-            for k in list(weights.keys()):
-                if "audio_" in k:
-                    weights.pop(k)
-
-            # Verify the name and shape of parameters since strict=False in load_state_dict.
-            for k, v in model.named_parameters():
-                if k not in weights:
-                    logger.warning(f"No weight for {k}")
-                elif v.shape != weights[k].shape:
+                if "state_dict" in weights:
                     logger.warning(
-                        f"Shape mismatch for {k}: {v.shape} vs {weights[k].shape}"
+                        "Using a TextToSemantic LightningModule checkpoint, "
+                        "please make sure it is a full model, not a LoRA model."
                     )
+                    weights = weights["state_dict"]
 
-            err = model.load_state_dict(weights, strict=False, assign=True)
-            logger.info(f"Loaded weights with error: {err}")
+                if next(iter(weights.keys())).startswith("model."):
+                    logger.info(
+                        f"Remove prefix 'model.' created by TextToSemantic LightningModule from keys"
+                    )
+                    new_weights = OrderedDict()
+                    for k, v in weights.items():
+                        new_weights[k.replace("model.", "")] = v
+                    weights = new_weights
+
+                # Remove audio related weights
+                for k in list(weights.keys()):
+                    if "audio_" in k:
+                        weights.pop(k)
+
+                # Verify the name and shape of parameters since strict=False in load_state_dict.
+                for k, v in model.named_parameters():
+                    if k not in weights:
+                        logger.warning(f"No weight for {k}")
+                    elif v.shape != weights[k].shape:
+                        logger.warning(
+                            f"Shape mismatch for {k}: {v.shape} vs {weights[k].shape}"
+                        )
+
+                err = model.load_state_dict(weights, strict=False, assign=True)
+                logger.info(f"Loaded weights with error: {err}")
 
         if lora_config is not None:
             setup_lora(model, lora_config)
@@ -764,8 +880,9 @@ class Attention(nn.Module):
         self.kv_cache = None
 
         if config.attention_qk_norm:
-            self.q_norm = nn.RMSNorm(config.head_dim, config.norm_eps)
-            self.k_norm = nn.RMSNorm(config.head_dim, config.norm_eps)
+            # Use custom RMSNorm for PyTorch < 2.4 compatibility
+            self.q_norm = RMSNorm(config.head_dim, config.norm_eps)
+            self.k_norm = RMSNorm(config.head_dim, config.norm_eps)
 
         self.dropout = config.dropout
         self.n_head = config.n_head
@@ -887,20 +1004,6 @@ class FeedForward(nn.Module):
 
     def forward(self, x: Tensor) -> Tensor:
         return self.w2(F.silu(self.w1(x)) * self.w3(x))
-
-
-class RMSNorm(nn.Module):
-    def __init__(self, dim: int, eps: float = 1e-5):
-        super().__init__()
-        self.eps = eps
-        self.weight = nn.Parameter(torch.ones(dim))
-
-    def _norm(self, x):
-        return x * torch.rsqrt(torch.mean(x * x, dim=-1, keepdim=True) + self.eps)
-
-    def forward(self, x: Tensor) -> Tensor:
-        output = self._norm(x.float()).type_as(x)
-        return output * self.weight
 
 
 def precompute_freqs_cis(seq_len: int, n_elem: int, base: int = 10000) -> Tensor:

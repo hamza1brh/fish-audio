@@ -79,7 +79,13 @@ __author__ = "Fish-Speech Team"
 
 # Core exports
 from s1_mini.config import EngineConfig, ServerConfig
-from s1_mini.engine import ProductionTTSEngine
+from s1_mini.engine import (
+    ProductionTTSEngine,
+    BatchGenerationRequest,
+    BatchGenerationResponse,
+    GenerationRequest,
+    GenerationResponse,
+)
 from s1_mini.exceptions import (
     S1MiniError,
     ModelLoadError,
@@ -87,6 +93,10 @@ from s1_mini.exceptions import (
     TimeoutError,
     VRAMError,
 )
+
+# Batch processing
+from s1_mini.batch_queue import BatchQueue, BatchRequest, Batch
+from s1_mini.batch_worker import BatchedModelWorker, create_batched_model_worker
 
 # Platform detection and compilation
 from s1_mini.compilation import (
@@ -118,6 +128,16 @@ __all__ = [
     "ServerConfig",
     # Engine
     "ProductionTTSEngine",
+    "GenerationRequest",
+    "GenerationResponse",
+    "BatchGenerationRequest",
+    "BatchGenerationResponse",
+    # Batch processing
+    "BatchQueue",
+    "BatchRequest",
+    "Batch",
+    "BatchedModelWorker",
+    "create_batched_model_worker",
     # Exceptions
     "S1MiniError",
     "ModelLoadError",

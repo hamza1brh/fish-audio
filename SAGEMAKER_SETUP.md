@@ -1,13 +1,24 @@
-# Fish Speech - AWS SageMaker Setup Guide
+# Fish Speech - AWS SageMaker Studio Setup Guide
 
-## Quick Start (Copy-Paste This)
+This guide is for **SageMaker Studio** (the Jupyter IDE), not SageMaker endpoints.
+
+## Quick Start (SageMaker Studio Terminal)
 
 ```bash
-# Run this single command on SageMaker:
-curl -sSL https://raw.githubusercontent.com/YOUR_REPO/fish-speech/main/scripts/sagemaker_install.sh | bash
+# 1. Open a terminal in SageMaker Studio
+# 2. Clone the repo (or upload it)
+git clone https://github.com/YOUR_REPO/fish-speech.git
+cd fish-speech
 
-# Or if you have the repo cloned:
+# 3. Run the install script
 python scripts/install_sagemaker.py
+```
+
+## Quick Start (SageMaker Studio Notebook)
+
+```python
+# Run this in a notebook cell:
+!python scripts/install_sagemaker.py
 ```
 
 ---

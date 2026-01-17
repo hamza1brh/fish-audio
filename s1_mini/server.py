@@ -50,6 +50,7 @@ Deployment Notes:
 """
 
 import asyncio
+import base64
 import os
 import time
 from contextlib import asynccontextmanager
@@ -78,7 +79,9 @@ class TTSRequest(BaseModel):
 
     Attributes:
         text: Text to synthesize (required)
-        reference_id: Pre-registered reference voice ID
+        reference_audio: Base64-encoded audio for zero-shot voice cloning
+        reference_text: Text spoken in reference audio (required with reference_audio)
+        reference_id: Pre-registered reference voice ID (alternative to reference_audio)
         max_new_tokens: Maximum tokens to generate (default: 2048)
         temperature: Sampling temperature 0.0-2.0 (default: 0.7)
         top_p: Nucleus sampling threshold 0.0-1.0 (default: 0.8)
@@ -89,6 +92,8 @@ class TTSRequest(BaseModel):
     """
 
     text: str = Field(..., min_length=1, max_length=10000, description="Text to synthesize")
+    reference_audio: Optional[str] = Field(None, description="Base64-encoded audio for zero-shot cloning")
+    reference_text: Optional[str] = Field(None, description="Text spoken in reference audio")
     reference_id: Optional[str] = Field(None, description="Pre-registered reference ID")
     max_new_tokens: int = Field(2048, ge=1, le=4096, description="Max tokens")
     temperature: float = Field(0.7, ge=0.0, le=2.0, description="Sampling temperature")
@@ -102,6 +107,7 @@ class TTSRequest(BaseModel):
         json_schema_extra = {
             "example": {
                 "text": "Hello, this is a test of the text to speech system.",
+                "reference_text": "This is the text spoken in the reference audio.",
                 "temperature": 0.7,
                 "top_p": 0.8,
             }
@@ -124,6 +130,55 @@ class ErrorResponse(BaseModel):
 
     error: str
     detail: Optional[str] = None
+
+
+class BatchTTSRequest(BaseModel):
+    """
+    Batch TTS generation request.
+
+    Attributes:
+        items: List of TTS requests to process
+        max_new_tokens: Shared max tokens (can be overridden per item)
+        temperature: Shared temperature
+        top_p: Shared top-p sampling
+        repetition_penalty: Shared repetition penalty
+        chunk_length: Shared chunk length
+    """
+    items: List[TTSRequest] = Field(..., min_length=1, max_length=8, description="List of TTS requests")
+    max_new_tokens: int = Field(2048, ge=1, le=4096, description="Max tokens")
+    temperature: float = Field(0.7, ge=0.0, le=2.0, description="Sampling temperature")
+    top_p: float = Field(0.8, ge=0.0, le=1.0, description="Top-p sampling")
+    repetition_penalty: float = Field(1.1, ge=0.0, le=2.0, description="Repetition penalty")
+    chunk_length: int = Field(200, ge=50, le=500, description="Chunk length")
+    seed: Optional[int] = Field(None, description="Random seed")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "items": [
+                    {"text": "Hello, this is the first message."},
+                    {"text": "And this is the second message."},
+                ],
+                "temperature": 0.7,
+                "top_p": 0.8,
+            }
+        }
+
+
+class BatchTTSResponseItem(BaseModel):
+    """Single item in batch response."""
+    success: bool
+    audio_base64: Optional[str] = None
+    error: Optional[str] = None
+    generation_time: Optional[float] = None
+
+
+class BatchTTSResponse(BaseModel):
+    """Batch TTS generation response."""
+    success: bool
+    results: List[BatchTTSResponseItem]
+    total_time: float
+    error: Optional[str] = None
 
 
 # =============================================================================
@@ -313,7 +368,9 @@ def register_routes(app: FastAPI):
 
         Request Body:
             text: Text to synthesize
-            reference_id: Optional reference voice ID
+            reference_audio: Base64-encoded audio for zero-shot cloning (optional)
+            reference_text: Text spoken in reference audio (required with reference_audio)
+            reference_id: Pre-registered reference ID (alternative to reference_audio)
             temperature: Sampling temperature
             top_p: Nucleus sampling threshold
             ...
@@ -327,9 +384,29 @@ def register_routes(app: FastAPI):
         app_state.request_count += 1
 
         try:
+            # Handle reference audio for zero-shot cloning
+            reference_audio_bytes = None
+            if request.reference_audio is not None:
+                # Validate reference_text is provided
+                if request.reference_text is None:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="reference_text is required when using reference_audio"
+                    )
+                # Decode base64 audio
+                try:
+                    reference_audio_bytes = base64.b64decode(request.reference_audio)
+                except Exception as e:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Invalid base64 encoding for reference_audio: {e}"
+                    )
+
             # Generate audio
             response = app_state.engine.generate(
                 text=request.text,
+                reference_audio=reference_audio_bytes,
+                reference_text=request.reference_text,
                 reference_id=request.reference_id,
                 max_new_tokens=request.max_new_tokens,
                 temperature=request.temperature,
@@ -358,6 +435,9 @@ def register_routes(app: FastAPI):
 
         except HTTPException:
             raise
+        except ValueError as e:
+            app_state.error_count += 1
+            raise HTTPException(status_code=400, detail=str(e))
         except TimeoutError as e:
             app_state.error_count += 1
             raise HTTPException(status_code=504, detail=str(e))
@@ -375,17 +455,36 @@ def register_routes(app: FastAPI):
         Generate TTS audio with streaming.
 
         Returns audio as chunked stream for real-time playback.
+        Supports zero-shot voice cloning via reference_audio + reference_text.
         """
         if app_state.engine is None or not app_state.engine.is_running:
             raise HTTPException(status_code=503, detail="Engine not ready")
 
         app_state.request_count += 1
 
+        # Handle reference audio for zero-shot cloning
+        reference_audio_bytes = None
+        if request.reference_audio is not None:
+            if request.reference_text is None:
+                raise HTTPException(
+                    status_code=400,
+                    detail="reference_text is required when using reference_audio"
+                )
+            try:
+                reference_audio_bytes = base64.b64decode(request.reference_audio)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid base64 encoding for reference_audio: {e}"
+                )
+
         async def audio_generator():
             """Async generator for streaming audio chunks."""
             try:
                 for result in app_state.engine.generate_stream(
                     text=request.text,
+                    reference_audio=reference_audio_bytes,
+                    reference_text=request.reference_text,
                     reference_id=request.reference_id,
                     max_new_tokens=request.max_new_tokens,
                     temperature=request.temperature,
@@ -418,6 +517,104 @@ def register_routes(app: FastAPI):
             media_type="audio/wav",
             headers={"Transfer-Encoding": "chunked"},
         )
+
+    @app.post("/v1/tts/batch", response_model=BatchTTSResponse, tags=["TTS"])
+    async def generate_tts_batch(request: BatchTTSRequest):
+        """
+        Generate TTS audio for multiple texts in a batch.
+
+        This endpoint processes multiple TTS requests together, which can
+        be more efficient for bulk processing.
+
+        Request Body:
+            items: List of TTS requests (text + optional references)
+            max_new_tokens: Shared maximum tokens
+            temperature: Shared sampling temperature
+            top_p: Shared nucleus sampling threshold
+            ...
+
+        Returns:
+            BatchTTSResponse with results for each item
+        """
+        if app_state.engine is None or not app_state.engine.is_running:
+            raise HTTPException(status_code=503, detail="Engine not ready")
+
+        app_state.request_count += len(request.items)
+
+        try:
+            # Extract texts and reference info from items
+            texts = []
+            reference_audios = []
+            reference_texts = []
+            reference_ids = []
+
+            for item in request.items:
+                texts.append(item.text)
+
+                # Decode reference audio if provided
+                ref_audio = None
+                if item.reference_audio is not None:
+                    if item.reference_text is None:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"reference_text is required when using reference_audio for text: {item.text[:50]}..."
+                        )
+                    try:
+                        ref_audio = base64.b64decode(item.reference_audio)
+                    except Exception as e:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"Invalid base64 encoding for reference_audio: {e}"
+                        )
+
+                reference_audios.append(ref_audio)
+                reference_texts.append(item.reference_text)
+                reference_ids.append(item.reference_id)
+
+            # Generate batch
+            batch_response = app_state.engine.generate_batch(
+                texts=texts,
+                reference_audios=reference_audios,
+                reference_texts=reference_texts,
+                reference_ids=reference_ids,
+                max_new_tokens=request.max_new_tokens,
+                temperature=request.temperature,
+                top_p=request.top_p,
+                repetition_penalty=request.repetition_penalty,
+                chunk_length=request.chunk_length,
+                seed=request.seed,
+                return_bytes=True,
+            )
+
+            # Convert results to response format
+            results = []
+            for gen_response in batch_response.results:
+                if gen_response.success and gen_response.audio_bytes:
+                    results.append(BatchTTSResponseItem(
+                        success=True,
+                        audio_base64=base64.b64encode(gen_response.audio_bytes).decode(),
+                        generation_time=gen_response.metrics.total_time_seconds if gen_response.metrics else None,
+                    ))
+                else:
+                    app_state.error_count += 1
+                    results.append(BatchTTSResponseItem(
+                        success=False,
+                        error=gen_response.error,
+                    ))
+
+            return BatchTTSResponse(
+                success=batch_response.success,
+                results=results,
+                total_time=batch_response.total_time,
+                error=batch_response.error,
+            )
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            app_state.error_count += len(request.items)
+            logger.error(f"Batch TTS generation failed: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
 
     # =========================================================================
     # Info Endpoints

@@ -227,6 +227,7 @@ def create_model_worker(
     model: Any,
     decode_one_token: Callable,
     device: str,
+    max_batch_size: int = 1,
 ) -> queue.Queue:
     """
     Create a thread-safe worker for model inference.
@@ -267,14 +268,15 @@ def create_model_worker(
         from fish_speech.models.text2semantic.inference import generate_long
 
         # Set up KV cache once (persistent across all requests)
+        # Use max_batch_size for batched inference support
         with torch.device(device):
             model.setup_caches(
-                max_batch_size=1,
+                max_batch_size=max_batch_size,
                 max_seq_len=model.config.max_seq_len,
                 dtype=next(model.parameters()).dtype,
             )
         model._cache_setup_done = True
-        logger.info("KV cache initialized")
+        logger.info(f"KV cache initialized with max_batch_size={max_batch_size}")
 
         # Signal that initialization is complete
         init_event.set()
@@ -485,10 +487,13 @@ class ModelManager:
         )
 
         # Create worker thread
+        # Note: The regular worker uses batch_size=1 for sequential processing.
+        # Batched inference uses the BatchedModelWorker with larger batch sizes.
         self.llama_queue = create_model_worker(
             model=self.llama_model,
             decode_one_token=self.decode_one_token,
             device=self.config.device,
+            max_batch_size=1,  # Sequential worker always uses batch_size=1
         )
 
         self._models_loaded = True

@@ -48,6 +48,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+quantization = [
+    "torchao>=0.15.0",
+]
 stable = [
     "torch<2.9.0",
     "torchaudio",

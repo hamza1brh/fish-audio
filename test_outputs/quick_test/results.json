@@ -1,0 +1,25 @@
+{
+  "total_generations": 1,
+  "successful": 1,
+  "failed": 0,
+  "total_time": 46.079448223114014,
+  "results_by_quant": {
+    "int8": [
+      {
+        "language": "english",
+        "sentence_idx": 1,
+        "text": "The advancement of artificial intelligence has transformed the way we interact with technology in our daily lives. From virtual assistants that help us manage our schedules to sophisticated algorithms that power recommendation systems, AI has become an integral part of modern society that continues to evolve at an unprecedented pace.",
+        "quantization": "int8",
+        "generation_time": 31.36881184577942,
+        "audio_duration": 16.300408163265306,
+        "sample_rate": 44100,
+        "output_path": "test_outputs\\quick_test\\int8\\english_1.wav",
+        "success": true,
+        "error": null
+      }
+    ]
+  },
+  "avg_rtf_by_quant": {
+    "int8": 1.9244187956269927
+  }
+}
