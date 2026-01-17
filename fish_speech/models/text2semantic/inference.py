@@ -454,10 +454,13 @@ def init_model(checkpoint_path, device, precision, compile=False, runtime_int4=F
     model._cache_setup_done = False
 
     if compile:
-        # Check if we have cached kernels
-        cache_files = list(CACHE_DIR.glob("*.py")) if CACHE_DIR.exists() else []
+        # Check if we have cached kernels (inductor uses various file formats)
+        cache_files = []
+        if CACHE_DIR.exists():
+            cache_files = list(CACHE_DIR.rglob("*"))  # Check all files recursively
+            cache_files = [f for f in cache_files if f.is_file()]
         if cache_files:
-            logger.info(f"Found {len(cache_files)} cached kernels - compilation should be fast")
+            logger.info(f"Found {len(cache_files)} cached kernel files - compilation should be fast")
         else:
             logger.info("No cached kernels found - first compilation will take 30-60s")
 

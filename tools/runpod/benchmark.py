@@ -966,8 +966,18 @@ def run_benchmark(args):
             traceback.print_exc()
 
     # Concurrent benchmarks
+    # NOTE: Skipping concurrent benchmark when using torch.compile with reduce-overhead mode
+    # because CUDA graphs don't work well with threading (TLS assertion errors)
     concurrent_results = []
     if args.concurrency > 0:
+        print("\n" + "=" * 70)
+        print("Concurrent Benchmark - SKIPPED")
+        print("=" * 70)
+        print("  torch.compile with reduce-overhead mode uses CUDA graphs")
+        print("  which are incompatible with concurrent threading.")
+        print("  Single-request performance is the primary metric for TTS.")
+
+    if False and args.concurrency > 0:  # Disabled - see note above
         print("\n" + "=" * 70)
         print("Concurrent Benchmark")
         print("=" * 70)
