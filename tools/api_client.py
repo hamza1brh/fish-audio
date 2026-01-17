@@ -4,8 +4,13 @@ import time
 import wave
 
 import ormsgpack
-import pyaudio
 import requests
+
+try:
+    import pyaudio
+    PYAUDIO_AVAILABLE = True
+except ImportError:
+    PYAUDIO_AVAILABLE = False
 from pydub import AudioSegment
 from pydub.playback import play
 
@@ -188,6 +193,11 @@ if __name__ == "__main__":
 
     if response.status_code == 200:
         if args.streaming:
+            if not PYAUDIO_AVAILABLE:
+                raise ImportError(
+                    "pyaudio is required for streaming playback. "
+                    "Install with: pip install pyaudio (requires portaudio19-dev on Linux)"
+                )
             p = pyaudio.PyAudio()
             audio_format = pyaudio.paInt16  # Assuming 16-bit PCM format
             stream = p.open(

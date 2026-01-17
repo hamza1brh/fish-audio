@@ -35,7 +35,6 @@ dependencies = [
     "einx[torch]==0.2.2",
     "zstandard>=0.22.0",
     "pydub",
-    "pyaudio",
     "modelscope==1.17.1",
     "opencc-python-reimplemented==0.1.7",
     "silero-vad",
@@ -50,6 +49,9 @@ dependencies = [
 [project.optional-dependencies]
 quantization = [
     "torchao>=0.15.0",
+]
+microphone = [
+    "pyaudio",
 ]
 stable = [
     "torch<2.9.0",
