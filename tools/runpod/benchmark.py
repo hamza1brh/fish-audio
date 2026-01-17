@@ -1,11 +1,11 @@
 """
 Comprehensive Fish-Speech Benchmark for RunPod
-Tests: BF16 vs INT8, compile mode, concurrent inference, VRAM usage, throughput
+Tests: BF16 vs INT8, concurrent inference, VRAM usage, throughput
+Always uses torch.compile for optimal performance.
 
 Run:
   python tools/runpod/benchmark.py                              # Default benchmark
-  python tools/runpod/benchmark.py --compile                    # With torch.compile
-  python tools/runpod/benchmark.py --compile --num-samples 10   # More samples
+  python tools/runpod/benchmark.py --num-samples 10             # More samples
   python tools/runpod/benchmark.py --concurrency 4              # Concurrent test
   python tools/runpod/benchmark.py --output report.html         # HTML report
 """
@@ -917,6 +917,8 @@ def run_benchmark(args):
     for key, value in gpu_info.items():
         print(f"  {key}: {value}")
     print(f"  INT8 quantization: {'Available' if INT8_AVAILABLE else 'Unavailable (torchao/PyTorch mismatch)'}")
+    print(f"  torch.compile: Enabled (required for optimal performance)")
+    print("\n  NOTE: First run includes compilation overhead (~30-60s warmup)")
 
     checkpoint_path = "checkpoints/openaudio-s1-mini"
 
@@ -925,29 +927,21 @@ def run_benchmark(args):
         print("Run: huggingface-cli download fishaudio/openaudio-s1-mini --local-dir checkpoints/openaudio-s1-mini")
         return
 
-    # Build test configurations
+    # Build test configurations - always use torch.compile for optimal performance
+    # Non-compiled mode is not supported as it's significantly slower
     configs = [
-        {"name": "BF16", "int8": False, "dac_int8": False, "compile": False},
+        {"name": "BF16 (compiled)", "int8": False, "dac_int8": False, "compile": True},
     ]
 
     # Add INT8 configs only if torchao is compatible
     if INT8_AVAILABLE:
         configs.extend([
-            {"name": "INT8", "int8": True, "dac_int8": False, "compile": False},
-            {"name": "INT8 + DAC INT8", "int8": True, "dac_int8": True, "compile": False},
+            {"name": "INT8 (compiled)", "int8": True, "dac_int8": False, "compile": True},
+            {"name": "INT8 + DAC INT8 (compiled)", "int8": True, "dac_int8": True, "compile": True},
         ])
     else:
         print("\n  WARNING: INT8 quantization unavailable (torchao/PyTorch version mismatch)")
         print("           Skipping INT8 configurations. Only BF16 will be tested.")
-
-    # Add compile variants if requested
-    if args.compile:
-        configs.append({"name": "BF16 + compile", "int8": False, "dac_int8": False, "compile": True})
-        if INT8_AVAILABLE:
-            configs.extend([
-                {"name": "INT8 + compile", "int8": True, "dac_int8": False, "compile": True},
-                {"name": "INT8 + DAC INT8 + compile", "int8": True, "dac_int8": True, "compile": True},
-            ])
 
     print(f"\nTesting {len(configs)} configurations...")
 
@@ -966,16 +960,6 @@ def run_benchmark(args):
             )
             results.append(result)
 
-            # Print compile speedup if we have a non-compile counterpart
-            if config["compile"]:
-                base_name = config["name"].replace(" + compile", "")
-                for prev_result in results:
-                    if prev_result.config_name == base_name:
-                        if prev_result.avg_latency_s > 0:
-                            speedup = prev_result.avg_latency_s / result.avg_latency_s
-                            print(f"  Speedup vs no-compile: {speedup:.2f}x")
-                        break
-
         except Exception as e:
             print(f"Error benchmarking {config['name']}: {e}")
             import traceback
@@ -988,9 +972,9 @@ def run_benchmark(args):
         print("Concurrent Benchmark")
         print("=" * 70)
 
-        # Use INT8 if available, otherwise BF16
+        # Use INT8 if available, otherwise BF16 - always compiled
         use_int8 = INT8_AVAILABLE
-        config_desc = "INT8 + DAC INT8" if use_int8 else "BF16"
+        config_desc = "INT8 + DAC INT8 (compiled)" if use_int8 else "BF16 (compiled)"
         print(f"  Using {config_desc} configuration for concurrent tests")
 
         # Test multiple concurrency levels
@@ -1005,7 +989,7 @@ def run_benchmark(args):
                     num_requests=concurrency * 2,  # 2 requests per worker
                     runtime_int8=use_int8,
                     dac_int8=use_int8,
-                    compile_mode=args.compile,
+                    compile_mode=True,  # Always use torch.compile
                 )
                 concurrent_results.append(result)
             except Exception as e:
@@ -1019,22 +1003,13 @@ def run_benchmark(args):
     print("=" * 70)
 
     if results:
-        print("\n" + "-" * 100)
-        print(f"{'Config':<30} {'VRAM':<10} {'RTF':<10} {'Audio/hr':<12} {'Compile Speedup':<15}")
-        print("-" * 100)
+        print("\n" + "-" * 85)
+        print(f"{'Config':<35} {'VRAM':<10} {'RTF':<10} {'Tokens/s':<12} {'Audio/hr':<12}")
+        print("-" * 85)
 
         for r in results:
-            # Calculate compile speedup
-            speedup = "-"
-            if r.compile_enabled:
-                base_name = r.config_name.replace(" + compile", "")
-                for prev in results:
-                    if prev.config_name == base_name and prev.avg_latency_s > 0:
-                        speedup = f"{prev.avg_latency_s / r.avg_latency_s:.2f}x"
-                        break
-
             audio_hr_mins = r.audio_per_hour / 60  # Convert seconds to minutes
-            print(f"{r.config_name:<30} {r.vram_baseline_mb/1024:>6.1f} GB {r.avg_rtf:>8.3f} {audio_hr_mins:>8.0f} min {speedup:>15}")
+            print(f"{r.config_name:<35} {r.vram_baseline_mb/1024:>6.1f} GB {r.avg_rtf:>8.3f} {r.tokens_per_sec:>8.1f} {audio_hr_mins:>8.0f} min")
 
     if concurrent_results:
         print(f"\nConcurrent throughput ({args.concurrency} workers): {concurrent_results[-1].requests_per_sec:.2f} requests/sec")
@@ -1054,7 +1029,7 @@ def run_benchmark(args):
             "timestamp": datetime.now().isoformat(),
             "gpu_info": gpu_info,
             "args": {
-                "compile": args.compile,
+                "compile": True,  # Always enabled
                 "num_samples": args.num_samples,
                 "concurrency": args.concurrency,
                 "warmup_runs": args.warmup_runs,
@@ -1129,24 +1104,20 @@ def run_benchmark(args):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Fish-Speech Comprehensive Benchmark Suite",
+        description="Fish-Speech Comprehensive Benchmark Suite (always uses torch.compile)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
   python tools/runpod/benchmark.py                              # Default benchmark
-  python tools/runpod/benchmark.py --compile                    # With torch.compile
-  python tools/runpod/benchmark.py --compile --num-samples 10   # More samples
+  python tools/runpod/benchmark.py --num-samples 10             # More samples
   python tools/runpod/benchmark.py --concurrency 4              # Concurrent test
   python tools/runpod/benchmark.py --output report.html         # HTML report
   python tools/runpod/benchmark.py --json results.json          # JSON export
+
+Note: torch.compile is always enabled for optimal performance.
         """
     )
 
-    parser.add_argument(
-        "--compile",
-        action="store_true",
-        help="Enable torch.compile for additional test configurations"
-    )
     parser.add_argument(
         "--num-samples",
         type=int,

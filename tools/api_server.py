@@ -79,12 +79,19 @@ class API(ExceptionHandler):
         self.app.on_startup(self.initialize_app)
 
     async def initialize_app(self, app: Kui):
+        # Handle compile flag (--no-compile overrides default True)
+        use_compile = self.args.compile and not getattr(self.args, 'no_compile', False)
+        if use_compile:
+            logger.info("torch.compile enabled (kernels cached at ~/.cache/fish_speech/torch_compile)")
+        else:
+            logger.warning("torch.compile disabled - inference will be slower")
+
         # Make the ModelManager available to the views
         app.state.model_manager = ModelManager(
             mode=self.args.mode,
             device=self.args.device,
             half=self.args.half,
-            compile=self.args.compile,
+            compile=use_compile,
             llama_checkpoint_path=self.args.llama_checkpoint_path,
             decoder_checkpoint_path=self.args.decoder_checkpoint_path,
             decoder_config_name=self.args.decoder_config_name,

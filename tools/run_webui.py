@@ -34,7 +34,17 @@ def parse_args():
     parser.add_argument("--decoder-config-name", type=str, default="modded_dac_vq")
     parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--half", action="store_true")
-    parser.add_argument("--compile", action="store_true")
+    parser.add_argument(
+        "--compile",
+        action="store_true",
+        default=True,
+        help="Enable torch.compile (default: True for optimal performance)"
+    )
+    parser.add_argument(
+        "--no-compile",
+        action="store_true",
+        help="Disable torch.compile (slower but avoids compilation overhead)"
+    )
     parser.add_argument("--max-gradio-length", type=int, default=0)
     parser.add_argument("--theme", type=str, default="light")
 
@@ -44,6 +54,13 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
     args.precision = torch.half if args.half else torch.bfloat16
+
+    # Handle compile flag (--no-compile overrides default True)
+    use_compile = args.compile and not args.no_compile
+    if use_compile:
+        logger.info("torch.compile enabled (kernels cached at ~/.cache/fish_speech/torch_compile)")
+    else:
+        logger.warning("torch.compile disabled - inference will be slower")
 
     # Check if MPS or CUDA is available
     if torch.backends.mps.is_available():
@@ -61,7 +78,7 @@ if __name__ == "__main__":
         checkpoint_path=args.llama_checkpoint_path,
         device=args.device,
         precision=args.precision,
-        compile=args.compile,
+        compile=use_compile,
     )
 
     logger.info("Loading VQ-GAN model...")
@@ -77,7 +94,7 @@ if __name__ == "__main__":
     inference_engine = TTSInferenceEngine(
         llama_queue=llama_queue,
         decoder_model=decoder_model,
-        compile=args.compile,
+        compile=use_compile,
         precision=args.precision,
     )
 

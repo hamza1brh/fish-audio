@@ -23,12 +23,27 @@ from fish_speech.content_sequence import (
 from fish_speech.tokenizer import IM_END_TOKEN
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
+# Enable persistent kernel cache - saves compiled kernels to disk
+# This dramatically speeds up subsequent runs (no recompilation needed)
+CACHE_DIR = Path.home() / ".cache" / "fish_speech" / "torch_compile"
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
+os.environ["TORCHINDUCTOR_CACHE_DIR"] = str(CACHE_DIR)
+
+# Enable all caching features for faster compilation
 torch._inductor.config.coordinate_descent_tuning = True
 torch._inductor.config.triton.unique_kernel_names = True
 
 if hasattr(torch._inductor.config, "fx_graph_cache"):
     # Experimental feature to reduce compilation times, will be on by default in future
     torch._inductor.config.fx_graph_cache = True
+
+# Enable kernel caching
+if hasattr(torch._inductor.config, "kernel_cache"):
+    torch._inductor.config.kernel_cache = True
+
+# Log cache status
+logger.info(f"torch.compile cache directory: {CACHE_DIR}")
 
 
 # PyTorch version compatibility for attention backend selection
@@ -439,13 +454,21 @@ def init_model(checkpoint_path, device, precision, compile=False, runtime_int4=F
     model._cache_setup_done = False
 
     if compile:
-        logger.info("Compiling function...")
+        # Check if we have cached kernels
+        cache_files = list(CACHE_DIR.glob("*.py")) if CACHE_DIR.exists() else []
+        if cache_files:
+            logger.info(f"Found {len(cache_files)} cached kernels - compilation should be fast")
+        else:
+            logger.info("No cached kernels found - first compilation will take 30-60s")
+
+        logger.info("Compiling function with torch.compile...")
         decode_one_token = torch.compile(
             decode_one_token,
             backend="inductor" if torch.cuda.is_available() else "aot_eager",
             mode="reduce-overhead" if torch.cuda.is_available() else None,
             fullgraph=True,
         )
+        logger.info("Compilation setup complete (actual compilation happens on first run)")
 
     return model.eval(), decode_one_token
 
