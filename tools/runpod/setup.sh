@@ -15,6 +15,10 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# Install system dependencies (for pyaudio)
+echo -e "${YELLOW}Installing system dependencies...${NC}"
+apt-get update -qq && apt-get install -y -qq portaudio19-dev ffmpeg > /dev/null 2>&1 || true
+
 # Check CUDA
 echo -e "${YELLOW}Checking CUDA...${NC}"
 nvidia-smi
@@ -33,16 +37,16 @@ fi
 
 # Install dependencies
 echo -e "${YELLOW}Installing dependencies...${NC}"
-pip install -e . --quiet
+pip install -e . --quiet 2>/dev/null || pip install -e . 2>&1 | grep -v "WARNING"
 
 # Install additional dependencies for benchmarking
 echo -e "${YELLOW}Installing benchmark dependencies...${NC}"
-pip install torchao streamlit aiohttp locust --quiet
+pip install torchao streamlit aiohttp locust "huggingface_hub[cli]" --quiet
 
 # Download model checkpoints
 echo -e "${YELLOW}Downloading model checkpoints...${NC}"
 if [ ! -d "checkpoints/openaudio-s1-mini" ]; then
-    huggingface-cli download fishaudio/openaudio-s1-mini --local-dir checkpoints/openaudio-s1-mini
+    python -m huggingface_hub.commands.huggingface_cli download fishaudio/openaudio-s1-mini --local-dir checkpoints/openaudio-s1-mini
 else
     echo -e "${GREEN}Checkpoints already exist${NC}"
 fi
