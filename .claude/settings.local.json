@@ -24,7 +24,10 @@
       "Bash(netstat:*)",
       "Bash(findstr:*)",
       "Bash(taskkill /F /PID 70092)",
-      "Bash(.venv/Scripts/pip install:*)"
+      "Bash(.venv/Scripts/pip install:*)",
+      "Bash(git checkout:*)",
+      "Bash(git fetch:*)",
+      "Bash(git show:*)"
     ],
     "deny": [],
     "ask": []
