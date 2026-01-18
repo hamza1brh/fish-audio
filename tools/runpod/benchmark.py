@@ -1087,21 +1087,47 @@ def run_benchmark(args):
     print(f"  torch.compile: Enabled (required for optimal performance)")
     print("\n  NOTE: First run includes compilation overhead (~30-60s warmup)")
 
-    checkpoint_path = "checkpoints/openaudio-s1-mini"
+    checkpoint_path = args.checkpoint
 
     if not Path(checkpoint_path).exists():
         print(f"\nError: Checkpoint not found at {checkpoint_path}")
         print("Run: huggingface-cli download fishaudio/openaudio-s1-mini --local-dir checkpoints/openaudio-s1-mini")
         return
 
+    print(f"\n  Checkpoint: {checkpoint_path}")
+
+    # Check if checkpoint is pre-quantized (by checking config.json)
+    is_prequantized = False
+    prequant_mode = None
+    config_path = Path(checkpoint_path) / "config.json"
+    if config_path.exists():
+        try:
+            with open(config_path) as f:
+                config_data = json.load(f)
+                if "quantization" in config_data:
+                    is_prequantized = True
+                    prequant_mode = config_data["quantization"].get("mode", "unknown")
+                    print(f"  Pre-quantized: Yes ({prequant_mode} via {config_data['quantization'].get('method', 'unknown')})")
+        except Exception:
+            pass
+
+    if not is_prequantized:
+        print(f"  Pre-quantized: No (BF16 base model)")
+
     # Build test configurations - always use torch.compile for optimal performance
     # Non-compiled mode is not supported as it's significantly slower
-    configs = [
-        {"name": "BF16 (compiled)", "int8": False, "dac_int8": False, "compile": True},
-    ]
+    # For pre-quantized models, don't apply runtime quantization
+    if is_prequantized:
+        configs = [
+            {"name": f"{prequant_mode.upper()} pre-quantized (compiled)", "int8": False, "dac_int8": False, "compile": True},
+        ]
+    else:
+        configs = [
+            {"name": "BF16 (compiled)", "int8": False, "dac_int8": False, "compile": True},
+        ]
 
-    # Add INT8 configs only if torchao is compatible
-    if INT8_AVAILABLE:
+    # Add INT8 runtime configs only if torchao is compatible AND model is not pre-quantized
+    if INT8_AVAILABLE and not is_prequantized:
         configs.extend([
             {"name": "INT8 (compiled)", "int8": True, "dac_int8": False, "compile": True},
             {"name": "INT8 + DAC INT8 (compiled)", "int8": True, "dac_int8": True, "compile": True},
@@ -1312,15 +1338,24 @@ def main():
 Examples:
   python tools/runpod/benchmark.py                              # Default benchmark
   python tools/runpod/benchmark.py --num-samples 10             # More samples
-  python tools/runpod/benchmark.py --batch-size 20              # Batch with 20 requests
   python tools/runpod/benchmark.py --output report.html         # HTML report
   python tools/runpod/benchmark.py --json results.json          # JSON export
+
+  # Test with pre-quantized INT8 model:
+  python tools/llama/quantize.py --checkpoint-path checkpoints/openaudio-s1-mini --mode int8
+  python tools/runpod/benchmark.py --checkpoint checkpoints/openaudio-s1-mini-int8-torchao-*/
 
 Note: torch.compile is always enabled for optimal performance.
       Concurrent threading is disabled (incompatible with CUDA graphs).
         """
     )
 
+    parser.add_argument(
+        "--checkpoint",
+        type=str,
+        default="checkpoints/openaudio-s1-mini",
+        help="Path to model checkpoint (default: checkpoints/openaudio-s1-mini)"
+    )
     parser.add_argument(
         "--num-samples",
         type=int,
